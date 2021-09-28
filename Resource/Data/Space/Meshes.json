@@ -1,0 +1,274 @@
+{
+  "Create Flag": [
+    "ComponentManager",
+    "ObjectManager",
+    "Scene",
+    "World",
+    "Logic"
+  ],
+  "Update Flag": [
+    "Scene",
+    "Logic"
+  ],
+  "FixedUpdate Flag": [
+    "World"
+  ],
+  "Objects": [
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [0, 0, -60],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::CameraComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [0, 0, -60],
+            "Zoom": 1.0
+          }
+        },
+        {
+          "Type": "class Game::ControllerComponent"
+        }
+      ],
+      "Name": "Camera"
+    },
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [0, 0, 0],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::MeshComponent",
+          "Value": {
+            "Mesh": {
+              "Type": "File",
+              "Path": "../../Resource/Mesh/CS300/bunny_high_poly.obj"
+            },
+            "Color": {
+              "Ambient": [1, 1, 1, 1],
+              "Diffuse": [1, 1, 1, 1],
+              "Specular": [1, 1, 1, 64]
+            },
+            "Texture": {
+              "DiffuseType": "None",
+              "Diffuse0": "",
+              "Diffuse1": "",
+              "Diffuse2": "",
+              "Specular": 0,
+              "NormalMap": 0
+
+            },
+            "Shader Type": "PhongInstancing"
+
+          }
+        }
+      ],
+      "Name": "Mesh"
+    },
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [2, 0, 0],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::MeshComponent",
+          "Value": {
+            "Mesh": {
+              "Type": "File",
+              "Path": "../../Resource/Mesh/CS300/bunny_high_poly.obj"
+            },
+            "Color": {
+              "Ambient": [1, 1, 1, 1],
+              "Diffuse": [1, 1, 1, 1],
+              "Specular": [1, 1, 1, 64]
+            },
+            "Texture": {
+              "DiffuseType": "None",
+              "Diffuse0": "",
+              "Diffuse1": "",
+              "Diffuse2": "",
+              "Specular": 0,
+              "NormalMap": 0
+
+            },
+            "Shader Type": "PhongInstancing"
+
+          }
+        }
+      ],
+      "Name": "Mesh"
+    },
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [4, 0, 0],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::MeshComponent",
+          "Value": {
+            "Mesh": {
+              "Type": "File",
+              "Path": "../../Resource/Mesh/CS300/bunny_high_poly.obj"
+            },
+            "Color": {
+              "Ambient": [1, 1, 1, 1],
+              "Diffuse": [1, 1, 1, 1],
+              "Specular": [1, 1, 1, 64]
+            },
+            "Texture": {
+              "DiffuseType": "None",
+              "Diffuse0": "",
+              "Diffuse1": "",
+              "Diffuse2": "",
+              "Specular": 0,
+              "NormalMap": 0
+
+            },
+            "Shader Type": "PhongInstancing"
+
+          }
+        }
+      ],
+      "Name": "Mesh"
+    },
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [6, 0, 0],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::MeshComponent",
+          "Value": {
+            "Mesh": {
+              "Type": "File",
+              "Path": "../../Resource/Mesh/CS300/bunny_high_poly.obj"
+            },
+            "Color": {
+              "Ambient": [1, 1, 1, 1],
+              "Diffuse": [1, 1, 1, 1],
+              "Specular": [1, 1, 1, 64]
+            },
+            "Texture": {
+              "DiffuseType": "None",
+              "Diffuse0": "",
+              "Diffuse1": "",
+              "Diffuse2": "",
+              "Specular": 0,
+              "NormalMap": 0
+
+            },
+            "Shader Type": "PhongInstancing"
+
+          }
+        }
+      ],
+      "Name": "Mesh"
+    },
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [8, 0, 0],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::MeshComponent",
+          "Value": {
+            "Mesh": {
+              "Type": "File",
+              "Path": "../../Resource/Mesh/CS300/bunny_high_poly.obj"
+            },
+            "Color": {
+              "Ambient": [1, 1, 1, 1],
+              "Diffuse": [1, 1, 1, 1],
+              "Specular": [1, 1, 1, 64]
+            },
+            "Texture": {
+              "DiffuseType": "None",
+              "Diffuse0": "",
+              "Diffuse1": "",
+              "Diffuse2": "",
+              "Specular": 0,
+              "NormalMap": 0
+
+            },
+            "Shader Type": "PhongInstancing"
+
+          }
+        }
+      ],
+      "Name": "Mesh"
+    },
+    {
+      "Components": [
+        {
+          "Type": "class GAM400::TransformComponent",
+          "Value": {
+            "Orientation": [1, 0, 0, 0],
+            "Position": [10, 0, 0],
+            "Scale": [1, 1, 1]
+          }
+        },
+        {
+          "Type": "class GAM400::MeshComponent",
+          "Value": {
+            "Mesh": {
+              "Type": "File",
+              "Path": "../../Resource/Mesh/CS300/bunny_high_poly.obj"
+            },
+            "Color": {
+              "Ambient": [1, 1, 1, 1],
+              "Diffuse": [1, 1, 1, 1],
+              "Specular": [1, 1, 1, 64]
+            },
+            "Texture": {
+              "DiffuseType": "None",
+              "Diffuse0": "",
+              "Diffuse1": "",
+              "Diffuse2": "",
+              "Specular": 0,
+              "NormalMap": 0
+
+            },
+            "Shader Type": "PhongInstancing"
+
+          }
+        }
+      ],
+      "Name": "Mesh"
+    }
+  ],
+  "Settings": {
+    "ProjectionMatrix": "Perspective"
+  },
+  "Type": "Space"
+}
