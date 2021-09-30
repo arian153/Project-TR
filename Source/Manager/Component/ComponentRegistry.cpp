@@ -8,6 +8,7 @@
 #include "EngineFactory/LightFactory.hpp"
 #include "EngineFactory/ParticleEmitterFactory.hpp"
 #include "EngineFactory/SkyFactory.hpp"
+#include "EngineFactory/TerrainFactory.hpp"
 
 namespace GAM400
 {
@@ -27,6 +28,7 @@ namespace GAM400
         AddFactory(new LightFactory());
         AddFactory(new ParticleEmitterFactory());
         AddFactory(new SkyFactory());
+        AddFactory(new TerrainFactory());
         return true;
     }
 
