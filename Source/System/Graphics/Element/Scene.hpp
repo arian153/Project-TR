@@ -10,6 +10,7 @@
 
 namespace GAM400
 {
+    class Terrain;
     class TextureSky;
     class CubeMapSky;
     class Light;
@@ -78,6 +79,8 @@ namespace GAM400
         void RemoveCubeMapSky(CubeMapSky* sky);
         void AddSkyDome(TextureSky* sky);
         void RemoveSkyDome(TextureSky* sky);
+        void AddTerrain(Terrain* terrain);
+        void RemoveTerrain(Terrain* terrain);
 
         //add
         Camera* AddCamera(Camera* camera);
@@ -114,6 +117,7 @@ namespace GAM400
         MeshTable                     m_mesh_table;
 
         std::vector<Light*>      m_lights;
+        std::vector<Terrain*>    m_terrains;
         std::vector<CubeMapSky*> m_cube_map_skies;
 
         eProjectionType m_projection_type = eProjectionType::Perspective;

@@ -1,5 +1,8 @@
 #include "Terrain.hpp"
 
+#include "../../Core/Utility/CoreUtility.hpp"
+#include "../Common/Buffer2/ConstantBufferCommon.hpp"
+#include "../Common/Buffer2/ConstantBufferData.hpp"
 #include "../Common/Buffer2/IndexBufferCommon.hpp"
 #include "../Common/Buffer2/VertexBufferCommon.hpp"
 #include "../DataType/MeshData.hpp"
@@ -15,8 +18,32 @@ namespace GAM400
     {
     }
 
-    void Terrain::Bind()
+    void Terrain::Initialize()
     {
+        CreateBuffer();
+    }
+
+    void Terrain::Update(Real dt)
+    {
+        E5_UNUSED_PARAM(dt);
+    }
+
+    void Terrain::Shutdown()
+    {
+        ReleaseBuffer();
+    }
+
+    void Terrain::Bind() const
+    {
+        m_vertex_buffer->Bind(0);
+        m_index_buffer->Bind(0);
+        m_textures.Bind();
+        m_texture_buffer->Bind();
+    }
+
+    void Terrain::Draw() const
+    {
+        m_index_buffer->Draw();
     }
 
     void Terrain::CreateBuffer()
@@ -29,6 +56,12 @@ namespace GAM400
         if (m_vertex_buffer == nullptr)
         {
             m_vertex_buffer = new VertexBufferCommon();
+        }
+
+        if (m_texture_buffer == nullptr)
+        {
+            m_texture_buffer = new ConstantBufferCommon();
+            m_texture_buffer->Init(m_renderer, eBindingStage::PixelShader, sizeof(TextureBufferData), 0);
         }
     }
 
@@ -47,12 +80,36 @@ namespace GAM400
             delete m_vertex_buffer;
             m_vertex_buffer = nullptr;
         }
+
+        if (m_texture_buffer != nullptr)
+        {
+            m_texture_buffer->Shutdown();
+            delete m_texture_buffer;
+            m_texture_buffer = nullptr;
+        }
     }
 
-    void Terrain::Build()
+    void Terrain::BuildBuffer() const
     {
         size_t size = m_grid.vertices.size();
+        if (m_terrain_vertex_size == size)
+        {
+            //update vertex buffer
+            m_vertex_buffer->Update(m_grid.vertices);
+        }
+        else
+        {
+            //resize vertex & index buffer
+            m_index_buffer->Shutdown();
+            m_vertex_buffer->Shutdown();
+            m_index_buffer->Init(m_renderer, m_grid.indices);
+            m_vertex_buffer->Init(m_renderer, m_grid.vertices, true);
+        }
+    }
 
+    void Terrain::GenerateTrigonometric()
+    {
+        size_t size = m_grid.vertices.size();
         for (size_t i = 0; i < size; ++i)
         {
             Vector3 p = m_grid.vertices[i].GetPosition();
@@ -61,15 +118,6 @@ namespace GAM400
             m_grid.vertices[i].SetPosition(p);
             m_grid.vertices[i].SetNormal(GenerateTrigonometricNormal(p.x, p.y));
             m_grid.vertices[i].CalculateTangentAndBinormal();
-        }
-
-        if (m_terrain_vertex_size == size)
-        {
-            //use dynamic buffer
-        }
-        else
-        {
-            //resize vertex & index buffer
         }
     }
 
@@ -93,7 +141,46 @@ namespace GAM400
     void Terrain::ClearGrid()
     {
         MeshGenerator mesh_generator;
-        mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, 50, 50, m_grid);
+        mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, m_depth_div, m_width_div, m_grid);
         m_terrain_vertex_size = m_grid.vertices.size();
+    }
+
+    void Terrain::AddTexture(TextureCommon* texture)
+    {
+        m_textures.PushBack(texture);
+    }
+
+    void Terrain::ClearTexture()
+    {
+        m_textures.Clear();
+    }
+
+    void Terrain::RemoveTexture(TextureCommon* texture)
+    {
+        m_textures.Erase(texture);
+    }
+
+    void Terrain::SetRenderer(RendererCommon* renderer)
+    {
+        m_renderer = renderer;
+    }
+
+    void Terrain::SetMaterialIdentifier(const MaterialIdentifier& material_data)
+    {
+        m_material = material_data;
+        m_textures.Clear();
+
+        //get actual resource data from resource manager.
+        if (m_texture_buffer != nullptr)
+        {
+            TextureBufferData data;
+            data.diff_type = m_material.diffuse_type;
+            data.spec_type = m_material.specular_type;
+            data.norm_type = m_material.normal_type;
+            //E5_TODO : need to update user gamma setting
+            data.gamma = 2.2f;
+
+            m_texture_buffer->Update(data);
+        }
     }
 }

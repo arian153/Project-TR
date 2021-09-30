@@ -543,6 +543,20 @@ namespace GAM400
         //}
     }
 
+    void Scene::AddTerrain(Terrain* terrain)
+    {
+        m_terrains.push_back(terrain);
+    }
+
+    void Scene::RemoveTerrain(Terrain* terrain)
+    {
+        if (!m_terrains.empty())
+        {
+            auto found = std::find(m_terrains.begin(), m_terrains.end(), terrain);
+            m_terrains.erase(found);
+        }
+    }
+
     Camera* Scene::AddCamera(Camera* camera)
     {
         if (m_cameras.empty())

@@ -26,6 +26,7 @@ namespace GAM400
       
     private:
         friend class TerrainFactory;
+        friend class Terrain;
 
     private:
         explicit TerrainComponent(Object* owner);
@@ -33,5 +34,6 @@ namespace GAM400
 
 
     private:
+        Terrain* m_terrain = nullptr;
     };
 }
