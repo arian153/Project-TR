@@ -39,13 +39,20 @@ namespace GAM400
 
         if (m_transform != nullptr)
         {
-            m_light->light_data.position  = m_transform->position;
+            m_light->light_data.position = m_transform->position;
         }
 
         if (m_owner->HasComponent<MeshComponent>())
         {
             auto mesh = m_owner->GetComponent<MeshComponent>();
-            mesh->SetDiffuseColor(m_light->light_data.diffuse_color);
+            if (m_light_type == eLightType::AmbientLight)
+            {
+                mesh->SetDiffuseColor(m_light->light_data.ambient_range);
+            }
+            else
+            {
+                mesh->SetDiffuseColor(m_light->light_data.diffuse_color);
+            }
         }
     }
 

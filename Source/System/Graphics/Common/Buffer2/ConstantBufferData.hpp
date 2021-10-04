@@ -75,6 +75,14 @@ namespace GAM400
         Color    reflect;
     };
 
+    struct MaterialBufferData
+    {
+        Color ambient;
+        Color diffuse;
+        Color specular;
+        Color reflect;
+    };
+
     struct TextureBufferData
     {
         int   diff_type;

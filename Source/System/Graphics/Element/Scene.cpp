@@ -9,6 +9,7 @@
 #include "../../../Manager/Resource/ResourceManager.hpp"
 #include "Mesh.hpp"
 #include "CubeMapSky.hpp"
+#include "Terrain.hpp"
 #include "../Utility/TextRenderer.hpp"
 #include "../Common/Buffer2/ConstantBufferCommon.hpp"
 #include "../Common/Buffer2/ConstantBufferData.hpp"
@@ -95,6 +96,12 @@ namespace GAM400
             light->Update(dt);
         }
 
+        for (auto& terrain : m_terrains)
+        {
+            terrain->Update(dt);
+            terrain->UpdateMatrixBuffer(m_main_camera->GetViewMatrix(), m_projection_matrix);
+        }
+
         for (auto& sky_box : m_cube_map_skies)
         {
             sky_box->SetCamera(m_main_camera);
@@ -137,6 +144,21 @@ namespace GAM400
 
             m_shader_manager->Bind(type);
             mesh->Draw();
+        }
+
+        for (auto& terrain : m_terrains)
+        {
+            terrain->Bind();
+            std::string type = terrain->GetShaderType();
+
+            if (type == "Phong")
+            {
+                m_camera_buffer->Bind();
+                m_light_buffer->Bind();
+            }
+
+            m_shader_manager->Bind(type);
+            terrain->Draw();
         }
 
         for (auto& particle : m_particle_emitters)
@@ -545,6 +567,7 @@ namespace GAM400
 
     void Scene::AddTerrain(Terrain* terrain)
     {
+        terrain->SetRenderer(m_renderer);
         m_terrains.push_back(terrain);
     }
 

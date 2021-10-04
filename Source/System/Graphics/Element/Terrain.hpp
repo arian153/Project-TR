@@ -1,10 +1,12 @@
 #pragma once
+#include "../../Math/Algebra/Matrix44.hpp"
 #include "../Common/Texture/TextureArrayCommon.hpp"
 #include "../DataType/MaterialData.hpp"
 #include "../DataType/MeshData.hpp"
 
 namespace GAM400
 {
+    class Matrix44;
     struct MaterialIdentifier;
     class ConstantBufferCommon;
     class RendererCommon;
@@ -39,27 +41,38 @@ namespace GAM400
         void RemoveTexture(TextureCommon* texture);
         void SetRenderer(RendererCommon* renderer);
         void SetMaterialIdentifier(const MaterialIdentifier& material_data);
+        void SetMaterialColor(const MaterialColor& color_data);
 
+        void SetWorldMatrix(const Matrix44& world);
+        void UpdateMatrixBuffer(const Matrix44& view, const Matrix44& proj) const;
+
+        std::string GetShaderType() const;
     private:
         friend class TerrainComponent;
 
     private:
         Real   m_terrain_width       = 200.0f;
         Real   m_terrain_depth       = 200.0f;
-        U32    m_width_div           = 50;
-        U32    m_depth_div           = 50;
+        U32    m_width_div           = 200;
+        U32    m_depth_div           = 200;
         size_t m_terrain_vertex_size = 0;
 
         Real m_trigonometric_factor_a = 0.3f;
         Real m_trigonometric_factor_b = 0.1f;
 
-        MeshData              m_grid;
-        TextureArrayCommon    m_textures;
-        MaterialIdentifier    m_material;
-        RendererCommon*       m_renderer       = nullptr;
-        VertexBufferCommon*   m_vertex_buffer  = nullptr;
-        IndexBufferCommon*    m_index_buffer   = nullptr;
-        TerrainComponent*     m_component      = nullptr;
+        Matrix44 m_world;
+
+        MeshData            m_grid;
+        TextureArrayCommon  m_textures;
+        MaterialIdentifier  m_material;
+        MaterialColor       m_mat_color;
+        RendererCommon*     m_renderer      = nullptr;
+        VertexBufferCommon* m_vertex_buffer = nullptr;
+        IndexBufferCommon*  m_index_buffer  = nullptr;
+        TerrainComponent*   m_component     = nullptr;
+
+        ConstantBufferCommon* m_matrix_buffer  = nullptr;
         ConstantBufferCommon* m_texture_buffer = nullptr;
+        ConstantBufferCommon* m_material_buffer = nullptr;
     };
 }

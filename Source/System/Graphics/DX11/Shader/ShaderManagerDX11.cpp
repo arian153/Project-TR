@@ -171,6 +171,7 @@ namespace GAM400
         AddShader(L"Texture.hlsl", m_texture_vertex_layout);
         AddShader(L"TextureInstancing.hlsl", m_instancing_texture_vertex_layout);
 
+        AddShader(L"Phong.hlsl", m_vertex_layout);
         AddShader(L"PhongInstancing.hlsl", m_instancing_vertex_layout);
         AddShader(L"SkyBox.hlsl", m_point_vertex_layout);
     }

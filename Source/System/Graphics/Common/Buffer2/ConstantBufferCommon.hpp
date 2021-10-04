@@ -17,6 +17,7 @@ namespace GAM400
     struct LightBufferData;
     struct MatrixBufferData;
     struct MatrixBufferDataInstancing;
+    struct MaterialBufferData;
     class Color;
     class RendererCommon;
 
@@ -35,6 +36,7 @@ namespace GAM400
         void Update(const MatrixBufferData& data) const;
         void Update(const MatrixBufferDataInstancing& data) const;
         void Update(const TextureBufferData& data) const;
+        void Update(const MaterialBufferData& data) const;
         void Update(const MultipleLightsBufferData& data) const;
 
         void* Map() const;
