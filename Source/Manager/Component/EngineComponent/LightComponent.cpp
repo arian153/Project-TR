@@ -145,6 +145,7 @@ namespace GAM400
         if (JsonResource::HasMember(data, "Direction") && JsonResource::IsVector3(data["Direction"]))
         {
             m_light->light_data.direction = (JsonResource::AsVector3(data["Direction"]));
+            m_light->light_data.direction.SetNormalize();
         }
         if (JsonResource::HasMember(data, "Position") && JsonResource::IsVector3(data["Position"]))
         {

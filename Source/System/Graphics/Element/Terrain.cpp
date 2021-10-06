@@ -31,6 +31,10 @@ namespace GAM400
 
     void Terrain::Shutdown()
     {
+        if (m_component != nullptr)
+        {
+            m_component->m_terrain = nullptr;
+        }
         ReleaseBuffer();
     }
 

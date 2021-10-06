@@ -108,6 +108,10 @@ namespace GAM400
 
     void SkyComponent::Edit(CommandRegistry* command_registry)
     {
+        if (ImGui::CollapsingHeader(m_type.c_str(), &m_b_open))
+        {
+            
+        }
     }
 
     void SkyComponent::Subscribe()

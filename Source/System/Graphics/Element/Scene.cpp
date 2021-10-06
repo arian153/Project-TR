@@ -259,6 +259,28 @@ namespace GAM400
             m_lights.clear();
         }
 
+        //clear cube_map_skies
+        {
+            for (auto& sky : m_cube_map_skies)
+            {
+                sky->Shutdown();
+                delete sky;
+                sky = nullptr;
+            }
+            m_cube_map_skies.clear();
+        }
+
+        //clear terrains
+        {
+            for (auto& terrain : m_terrains)
+            {
+                terrain->Shutdown();
+                delete terrain;
+                terrain = nullptr;
+            }
+            m_terrains.clear();
+        }
+
         //clear meshes
         {
             for (auto& [fst1, mesh_table] : m_mesh_table)

@@ -148,7 +148,7 @@ void CalculatePoint(Material   mat, PointLight     light,
     float distance = length(light_vec);
 
     // Range test.
-    if (distance > light.range)
+    if (distance > light.range && light.range > -1.0f)
         return;
 
     // Normalize the light vector.
@@ -196,7 +196,7 @@ void CalculateSpot(Material   mat, SpotLight      light,
     float distance = length(light_vec);
 
     // Range test.
-    if (distance > light.range)
+    if (distance > light.range && light.range > -1.0f)
         return;
 
     // Normalize the light vector.
@@ -253,7 +253,7 @@ void CalculateCapsule(Material   mat, CapsuleLight   light,
     float distance = length(light_vec);
 
     // Range test.
-    if (distance > light.range)
+    if (distance > light.range && light.range > -1.0f)
         return;
 
     // Normalize the light vector.
@@ -343,7 +343,7 @@ void CalculatePoint(Material   mat, DynamicLight   light,
     float distance = length(light_vec);
 
     // Range test.
-    if (distance > light.range)
+    if (distance > light.range && light.range > -1.0f)
         return;
 
     // Normalize the light vector.
@@ -391,7 +391,7 @@ void CalculateSpot(Material   mat, DynamicLight   light,
     float distance = length(light_vec);
 
     // Range test.
-    if (distance > light.range)
+    if (distance > light.range && light.range > -1.0f)
         return;
 
     // Normalize the light vector.
@@ -448,7 +448,7 @@ void CalculateCapsule(Material   mat, DynamicLight   light,
     float distance = length(light_vec);
 
     // Range test.
-    if (distance > light.range)
+    if (distance > light.range && light.range > -1.0f)
         return;
 
     // Normalize the light vector.

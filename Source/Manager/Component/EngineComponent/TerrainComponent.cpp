@@ -258,6 +258,10 @@ namespace GAM400
 
     void TerrainComponent::Edit(CommandRegistry* command_registry)
     {
+        if (ImGui::CollapsingHeader(m_type.c_str(), &m_b_open))
+        {
+            
+        }
     }
 
     void TerrainComponent::Subscribe()

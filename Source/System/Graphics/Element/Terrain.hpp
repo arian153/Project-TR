@@ -51,14 +51,14 @@ namespace GAM400
         friend class TerrainComponent;
 
     private:
-        Real   m_terrain_width       = 200.0f;
-        Real   m_terrain_depth       = 200.0f;
-        U32    m_width_div           = 200;
-        U32    m_depth_div           = 200;
+        Real   m_terrain_width       = 400.0f;
+        Real   m_terrain_depth       = 400.0f;
+        U32    m_width_div           = 400;
+        U32    m_depth_div           = 400;
         size_t m_terrain_vertex_size = 0;
 
         Real m_trigonometric_factor_a = 0.3f;
-        Real m_trigonometric_factor_b = 0.1f;
+        Real m_trigonometric_factor_b = 0.05f;
 
         Matrix44 m_world;
 
