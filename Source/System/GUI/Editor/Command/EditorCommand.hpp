@@ -65,8 +65,15 @@ namespace GAM400
             : m_instance(instance), m_prev(prev), m_next(next)
         {
             m_function = &MemberFunction<I, F>;
-            m_type = "Edit Data : ";
+            m_type     = "Edit Data : ";
             m_type += typeid(T).name();
+        }
+
+        EditFunction(void* instance, const T& prev, const T& next, const std::string& message)
+            : m_instance(instance), m_prev(prev), m_next(next)
+        {
+            m_function = &MemberFunction<I, F>;
+            m_type     = message;
         }
 
         ~EditFunction()

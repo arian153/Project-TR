@@ -37,7 +37,7 @@ namespace GAM400
         return light_data;
     }
 
-    void Light::SetType(eLightType type)
+    void Light::SetType(const eLightType& type)
     {
         m_type          = type;
         light_data.type = (int)type;

@@ -6,6 +6,8 @@
 #include "../../../System/Graphics/Element/Scene.hpp"
 #include "TransformComponent.hpp"
 #include "../../../System/Graphics/Element/Light.hpp"
+#include "../../../System/GUI/Editor/Command/CommandRegistry.hpp"
+#include "../../../System/GUI/Editor/Command/EditorCommand.hpp"
 #include "../../Object/Object.hpp"
 
 namespace GAM400
@@ -183,7 +185,14 @@ namespace GAM400
 
             if (ImGui::Combo("##Light Type", (int*)&m_light_type, light_type, 5))
             {
-                m_light->SetType(m_light_type);
+                eLightType  prev    = m_light->m_type;
+                eLightType  next    = m_light_type;
+                std::string message = "Change Light Type : " + std::string(light_type[(int)prev]) + " To " + std::string(light_type[(int)next]);
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  eLightType,
+                                                  Light,
+                                                  &Light::SetType>(m_light, prev, next, message));
             }
 
             ImGui::Text("Ambient Color");

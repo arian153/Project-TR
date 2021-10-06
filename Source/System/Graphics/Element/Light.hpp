@@ -19,7 +19,7 @@ namespace GAM400
         void Shutdown() const;
 
         LightBufferData GetLightBuffer() const;
-        void            SetType(eLightType type);
+        void            SetType(const eLightType& type);
 
     public:
         LightBufferData light_data;

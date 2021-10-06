@@ -9,6 +9,7 @@
 #define E5_UNUSED_PARAM(param) param
 #define E5_FALLTHROUGH
 #define E5_TYPE_TO_STRING(param) typeid(param).name();
+#define E5_MAKE_STRING(param) #param
 #define E5_UNUSED_ARGS(...) GAM400::UnusedParameter(__VA_ARGS__)
 #define E5_ASSERT(exp, str) if(GAM400::Assert((exp),(str), \
   __FUNCTION__,__FILE__, __LINE__))                         \

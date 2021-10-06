@@ -70,6 +70,8 @@ namespace GAM400
                 m_level_editor.Update(dt);
                 UpdateCommandWindow();
             }
+
+            ShowReadMe();
         }
     }
 
@@ -93,7 +95,7 @@ namespace GAM400
         if (ImGui::BeginMenu("File"))
         {
             size_t open_count = m_space_editor.OpenCount();
-            if (ImGui::BeginMenu("New"))
+            if (ImGui::BeginMenu("New - Not Implemented Yet"))
             {
                 ImGui::EndMenu();
             }
@@ -116,10 +118,10 @@ namespace GAM400
                 m_space_editor.CloseAllSequence();
             }
             ImGui::Separator();
-            if (ImGui::MenuItem("Save", nullptr, false, open_count > 0))
+            if (ImGui::MenuItem("Save - Not Implemented Yet", nullptr, false, open_count > 0))
             {
             }
-            if (ImGui::MenuItem("Save All", nullptr, false, open_count > 0))
+            if (ImGui::MenuItem("Save All - Not Implemented Yet", nullptr, false, open_count > 0))
             {
             }
             ImGui::Separator();
@@ -167,7 +169,7 @@ namespace GAM400
     {
         if (ImGui::BeginMenu("Object"))
         {
-            if (ImGui::BeginMenu("Create 3D Object"))
+            if (ImGui::BeginMenu("Create Object"))
             {
                 size_t size = m_archetype_names.size();
 
@@ -184,12 +186,6 @@ namespace GAM400
                 ImGui::EndMenu();
             }
             ImGui::Separator();
-            /*if (ImGui::MenuItem("Create Camera"))
-              {
-              }
-              if (ImGui::MenuItem("Create Light"))
-              {
-              }*/
             ImGui::EndMenu();
         }
     }
@@ -218,5 +214,29 @@ namespace GAM400
         {
         }
         ImGui::End();
+    }
+
+    void GameEditor::ShowReadMe()
+    {
+        if (m_show_readme)
+        {
+            if (ImGui::Begin("Read Me", &m_show_readme))
+            {
+                ImGui::Text("Usage");
+                ImGui::Text("1. Click File Tab, and Open Space.");
+                ImGui::Text("2. Camera Control");
+                ImGui::Text("    Hold Mouse LB & move - Change camera view direction on spherically");
+                ImGui::Text("    Roll Mouse Wheel     - Change spherical camera's radius on same view");
+                ImGui::Text("    Press W, S           - Change camera position Front and Back");
+                ImGui::Text("    Press A, D           - Change camera position Left and Right");
+                ImGui::Text("    Press R, F           - Change camera position Up and Down");
+                ImGui::NewLine();
+                if (ImGui::Button("Close"))
+                {
+                    m_show_readme = false;
+                }
+                ImGui::End();
+            }
+        }
     }
 }
