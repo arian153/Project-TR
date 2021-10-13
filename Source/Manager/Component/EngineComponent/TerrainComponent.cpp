@@ -258,9 +258,94 @@ namespace GAM400
 
     void TerrainComponent::Edit(CommandRegistry* command_registry)
     {
-        if (ImGui::CollapsingHeader(m_type.c_str(), &m_b_open))
+        if (ImGui::CollapsingHeader(m_type.c_str()))
         {
-            
+            ImGui::Text("Material");
+            ImGui::Text("Material - Ambient");
+            ImGui::ColorEdit4("##Material - Ambient", &m_terrain->m_mat_color.ambient.r);
+
+            if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                m_terrain->UpdateMaterialBuffer();
+            }
+
+            ImGui::Text("Material - Diffuse");
+            ImGui::ColorEdit4("##Material - Diffuse", &m_terrain->m_mat_color.diffuse.r);
+            if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                m_terrain->UpdateMaterialBuffer();
+            }
+
+            ImGui::Text("Material - Specular");
+            ImGui::ColorEdit4("##Material - Specular", &m_terrain->m_mat_color.specular.r);
+            if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                m_terrain->UpdateMaterialBuffer();
+            }
+
+            ImGui::NewLine();
+            ImGui::Text("Terrain");
+
+            if (ImGui::Button("Clear Terrain"))
+            {
+                m_terrain->ClearGrid();
+                m_terrain->BuildBuffer();
+            }
+
+            //ToDo : select generating algorithm
+            ImGui::Text("Terrain Width");
+            if (ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width))
+            {
+                m_terrain->m_terrain_width = Math::Max(m_terrain->m_terrain_width, 1.0f);
+                m_terrain->ClearGrid();
+                m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Terrain Depth");
+            if (ImGui::InputFloat("##Terrain Depth", &m_terrain->m_terrain_depth))
+            {
+                m_terrain->m_terrain_depth = Math::Max(m_terrain->m_terrain_depth, 1.0f);
+                m_terrain->ClearGrid();
+                m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Width LOD");
+            if (ImGui::InputInt("##LOD Width", &m_terrain->m_width_div))
+            {
+                m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                m_terrain->ClearGrid();
+                m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Depth LOD");
+            if (ImGui::InputInt("##LOD Depth", &m_terrain->m_depth_div))
+            {
+                m_terrain->m_depth_div = Math::Max(m_terrain->m_depth_div, 1);
+                m_terrain->ClearGrid();
+                m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
+
+            ImGui::Text("Trigonometric Scale");
+            if (ImGui::SliderFloat("##Terrain Trigonometric A", &m_terrain->m_trigonometric_factor_a, -1.0f, 1.0f))
+            {
+                //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Trigonometric Density");
+            if (ImGui::SliderFloat("##Terrain Trigonometric B", &m_terrain->m_trigonometric_factor_b, -0.3f, 0.3f))
+            {
+                //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
         }
     }
 

@@ -28,7 +28,7 @@ namespace GAM400
 
         void CreateBuffer();
         void ReleaseBuffer();
-        void BuildBuffer() const;
+        void BuildBuffer();
 
         void    GenerateTrigonometric();
         Real    GenerateTrigonometricHeight(Real x, Real z) const;
@@ -45,6 +45,8 @@ namespace GAM400
 
         void SetWorldMatrix(const Matrix44& world);
         void UpdateMatrixBuffer(const Matrix44& view, const Matrix44& proj) const;
+        void UpdateMaterialBuffer() const;
+        void UpdateTextureBuffer() const;
 
         std::string GetShaderType() const;
     private:
@@ -53,8 +55,8 @@ namespace GAM400
     private:
         Real   m_terrain_width       = 400.0f;
         Real   m_terrain_depth       = 400.0f;
-        U32    m_width_div           = 400;
-        U32    m_depth_div           = 400;
+        I32    m_width_div           = 400;
+        I32    m_depth_div           = 400;
         size_t m_terrain_vertex_size = 0;
 
         Real m_trigonometric_factor_a = 0.3f;
@@ -71,8 +73,8 @@ namespace GAM400
         IndexBufferCommon*  m_index_buffer  = nullptr;
         TerrainComponent*   m_component     = nullptr;
 
-        ConstantBufferCommon* m_matrix_buffer  = nullptr;
-        ConstantBufferCommon* m_texture_buffer = nullptr;
+        ConstantBufferCommon* m_matrix_buffer   = nullptr;
+        ConstantBufferCommon* m_texture_buffer  = nullptr;
         ConstantBufferCommon* m_material_buffer = nullptr;
     };
 }

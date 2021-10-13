@@ -122,7 +122,7 @@ namespace GAM400
         }
     }
 
-    void Terrain::BuildBuffer() const
+    void Terrain::BuildBuffer()
     {
         size_t size = m_grid.vertices.size();
         if (m_terrain_vertex_size == size)
@@ -137,6 +137,7 @@ namespace GAM400
             m_vertex_buffer->Shutdown();
             m_index_buffer->Init(m_renderer, m_grid.indices);
             m_vertex_buffer->Init(m_renderer, m_grid.vertices, true);
+            m_terrain_vertex_size = size;
         }
     }
 
@@ -174,8 +175,7 @@ namespace GAM400
     void Terrain::ClearGrid()
     {
         MeshGenerator mesh_generator;
-        mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, m_depth_div, m_width_div, m_grid);
-        //m_terrain_vertex_size = m_grid.vertices.size();
+        mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, (U32)m_depth_div, (U32)m_width_div, m_grid);
     }
 
     void Terrain::AddTexture(TextureCommon* texture)
@@ -245,6 +245,35 @@ namespace GAM400
         mvp_buffer.view  = view;
         mvp_buffer.proj  = proj;
         m_matrix_buffer->Update(mvp_buffer);
+    }
+
+    void Terrain::UpdateMaterialBuffer() const
+    {
+        if (m_material_buffer != nullptr)
+        {
+            MaterialBufferData data;
+            data.ambient  = m_mat_color.ambient;
+            data.diffuse  = m_mat_color.diffuse;
+            data.specular = m_mat_color.specular;
+            data.reflect  = m_mat_color.reflect;
+
+            m_material_buffer->Update(data);
+        }
+    }
+
+    void Terrain::UpdateTextureBuffer() const
+    {
+        if (m_texture_buffer != nullptr)
+        {
+            TextureBufferData data;
+            data.diff_type = m_material.diffuse_type;
+            data.spec_type = m_material.specular_type;
+            data.norm_type = m_material.normal_type;
+            //E5_TODO : need to update user gamma setting
+            data.gamma = 2.2f;
+
+            m_texture_buffer->Update(data);
+        }
     }
 
     std::string Terrain::GetShaderType() const
