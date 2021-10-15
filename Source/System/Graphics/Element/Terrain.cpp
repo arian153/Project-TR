@@ -178,6 +178,28 @@ namespace GAM400
         mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, (U32)m_depth_div, (U32)m_width_div, m_grid);
     }
 
+    void Terrain::GeneratePerlinNoise()
+    {
+        size_t size = m_grid.vertices.size();
+        for (size_t i = 0; i < size; ++i)
+        {
+            Vector3 p = m_grid.vertices[i].GetPosition();
+            p.y = PerilnNoise(p.x, p.z);
+
+            m_grid.vertices[i].SetPosition(p);
+            m_grid.vertices[i].SetNormal(GenerateTrigonometricNormal(p.x, p.y));
+            m_grid.vertices[i].CalculateTangentAndBinormal();
+        }
+    }
+
+    Real Terrain::PerilnNoise(Real x, Real y)
+    {
+        //choose corner
+        
+
+        return 0.0f;
+    }
+
     void Terrain::AddTexture(TextureCommon* texture)
     {
         m_textures.PushBack(texture);

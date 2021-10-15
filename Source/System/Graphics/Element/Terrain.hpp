@@ -36,6 +36,9 @@ namespace GAM400
 
         void ClearGrid();
 
+        void GeneratePerlinNoise();
+        Real PerilnNoise(Real x, Real y);
+
         void AddTexture(TextureCommon* texture);
         void ClearTexture();
         void RemoveTexture(TextureCommon* texture);
