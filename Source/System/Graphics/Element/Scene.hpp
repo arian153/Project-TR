@@ -6,6 +6,7 @@
 #include "../DataType/ProjectionType.hpp"
 #include <vector>
 #include "../../../Manager/Component/EngineComponent/MeshComponent.hpp"
+#include "../../Math/Primitive/Others/Ray.hpp"
 #include "../DataType/Frustum.hpp"
 
 namespace GAM400
@@ -115,6 +116,8 @@ namespace GAM400
         std::vector<MeshComponent*>   m_mesh_components;
         std::vector<Mesh*>            m_meshes;
         MeshTable                     m_mesh_table;
+
+        Ray m_picking_ray;
 
         std::vector<Light*>      m_lights;
         std::vector<Terrain*>    m_terrains;

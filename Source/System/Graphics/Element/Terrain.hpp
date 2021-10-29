@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Math/Algebra/Matrix44.hpp"
+#include "../../Math/Utility/NoiseUtility.hpp"
 #include "../Common/Texture/TextureArrayCommon.hpp"
 #include "../DataType/MaterialData.hpp"
 #include "../DataType/MeshData.hpp"
@@ -13,6 +14,12 @@ namespace GAM400
     class TerrainComponent;
     class VertexBufferCommon;
     class IndexBufferCommon;
+
+    struct TerrainNode
+    {
+        TerrainNode* parent = nullptr;
+        TerrainNode* children[4]; //4 child node
+    };
 
     class Terrain
     {
@@ -37,7 +44,6 @@ namespace GAM400
         void ClearGrid();
 
         void GeneratePerlinNoise();
-        Real PerilnNoise(Real x, Real y);
 
         void AddTexture(TextureCommon* texture);
         void ClearTexture();
@@ -52,6 +58,10 @@ namespace GAM400
         void UpdateTextureBuffer() const;
 
         std::string GetShaderType() const;
+
+        void CalculateNTB();
+        void CalculateGridIndices();
+
     private:
         friend class TerrainComponent;
 
@@ -61,13 +71,17 @@ namespace GAM400
         I32    m_width_div           = 400;
         I32    m_depth_div           = 400;
         size_t m_terrain_vertex_size = 0;
+        int    m_smooth_level    = 0;
 
         Real m_trigonometric_factor_a = 0.3f;
         Real m_trigonometric_factor_b = 0.05f;
 
         Matrix44 m_world;
 
-        MeshData            m_grid;
+        PerlinNoise                     m_noise_utility;
+        MeshData                        m_grid;
+        std::vector<GeometryPointIndex> m_point_indices;
+
         TextureArrayCommon  m_textures;
         MaterialIdentifier  m_material;
         MaterialColor       m_mat_color;

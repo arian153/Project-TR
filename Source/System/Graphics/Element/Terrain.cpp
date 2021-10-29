@@ -2,6 +2,7 @@
 
 #include "../../../Manager/Component/EngineComponent/TerrainComponent.hpp"
 #include "../../Core/Utility/CoreUtility.hpp"
+#include "../../Math/Utility/NoiseUtility.hpp"
 #include "../Common/Buffer2/ConstantBufferCommon.hpp"
 #include "../Common/Buffer2/ConstantBufferData.hpp"
 #include "../Common/Buffer2/IndexBufferCommon.hpp"
@@ -135,6 +136,7 @@ namespace GAM400
             //resize vertex & index buffer
             m_index_buffer->Shutdown();
             m_vertex_buffer->Shutdown();
+
             m_index_buffer->Init(m_renderer, m_grid.indices);
             m_vertex_buffer->Init(m_renderer, m_grid.vertices, true);
             m_terrain_vertex_size = size;
@@ -176,28 +178,24 @@ namespace GAM400
     {
         MeshGenerator mesh_generator;
         mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, (U32)m_depth_div, (U32)m_width_div, m_grid);
+        if (m_terrain_vertex_size != m_grid.vertices.size())
+            CalculateGridIndices();
     }
 
     void Terrain::GeneratePerlinNoise()
     {
+        Real half_width = m_terrain_width * 0.5f;
+        Real half_depth = m_terrain_depth * 0.5f;
+
         size_t size = m_grid.vertices.size();
+
         for (size_t i = 0; i < size; ++i)
         {
             Vector3 p = m_grid.vertices[i].GetPosition();
-            p.y = PerilnNoise(p.x, p.z);
-
+            Vector3 d;
+            p.y += m_noise_utility.Noise(Vector3(p.x + half_width, p.y, p.z + half_depth), d, m_smooth_level, true);
             m_grid.vertices[i].SetPosition(p);
-            m_grid.vertices[i].SetNormal(GenerateTrigonometricNormal(p.x, p.y));
-            m_grid.vertices[i].CalculateTangentAndBinormal();
         }
-    }
-
-    Real Terrain::PerilnNoise(Real x, Real y)
-    {
-        //choose corner
-        
-
-        return 0.0f;
     }
 
     void Terrain::AddTexture(TextureCommon* texture)
@@ -301,5 +299,47 @@ namespace GAM400
     std::string Terrain::GetShaderType() const
     {
         return m_material.shader_type;
+    }
+
+    void Terrain::CalculateNTB()
+    {
+        //Calculate Vertex Normal
+        std::vector<Vector3> normals;
+        Vector3              accumulated_normal;
+        for (auto& point : m_point_indices)
+        {
+            normals.clear();
+            accumulated_normal.SetZero();
+            for (auto& face : point.faces)
+            {
+                Vector3 normal = m_grid.GetFaceNormal(face.a, face.b, face.c);
+                auto    found  = std::find(normals.begin(), normals.end(), normal);
+                if (found == normals.end())
+                {
+                    accumulated_normal += normal;
+                    normals.push_back(normal);
+                }
+            }
+            m_grid.vertices[point.index].SetNormal(accumulated_normal.Normalize());
+            m_grid.vertices[point.index].CalculateTangentAndBinormal();
+        }
+    }
+
+    void Terrain::CalculateGridIndices()
+    {
+        size_t size = m_grid.vertices.size();
+        m_point_indices.clear();
+        for (size_t i = 0; i < size; ++i)
+        {
+            m_point_indices.emplace_back((U32)i);
+        }
+
+        for (auto& face : m_grid.faces)
+        {
+            //add adjacent faces
+            m_point_indices[face.a].faces.emplace_back(face.a, face.b, face.c);
+            m_point_indices[face.b].faces.emplace_back(face.a, face.b, face.c);
+            m_point_indices[face.c].faces.emplace_back(face.a, face.b, face.c);
+        }
     }
 }

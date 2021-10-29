@@ -634,18 +634,21 @@ namespace GAM400
             }
         }
         mesh_data.indices.resize(face_count * 3); // 3 indices per face
+        mesh_data.faces.resize(face_count);
         U32 k = 0;
+        U32 f = 0;
         for (U32 i = 0; i < m - 1; ++i)
         {
             for (U32 j = 0; j < n - 1; ++j)
             {
-                mesh_data.indices[k]     = i * n + j;
-                mesh_data.indices[k + 1] = i * n + j + 1;
-                mesh_data.indices[k + 2] = (i + 1) * n + j;
-                mesh_data.indices[k + 3] = (i + 1) * n + j;
-                mesh_data.indices[k + 4] = i * n + j + 1;
-                mesh_data.indices[k + 5] = (i + 1) * n + j + 1;
-                k += 6; // next quad
+                mesh_data.indices[k]     = mesh_data.faces[f].a     = i * n + j;
+                mesh_data.indices[k + 1] = mesh_data.faces[f].b     = i * n + j + 1;
+                mesh_data.indices[k + 2] = mesh_data.faces[f].c     = (i + 1) * n + j;
+                mesh_data.indices[k + 3] = mesh_data.faces[f + 1].a = (i + 1) * n + j;
+                mesh_data.indices[k + 4] = mesh_data.faces[f + 1].b = i * n + j + 1;
+                mesh_data.indices[k + 5] = mesh_data.faces[f + 1].c = (i + 1) * n + j + 1;
+                f += 2; // next quad faces
+                k += 6; // next quad indices
             }
         }
     }

@@ -292,6 +292,20 @@ namespace GAM400
                 m_terrain->BuildBuffer();
             }
 
+            ImGui::Text("Interpolation Mode");
+            const char* interpolation_mode[] = {"Smooth Order 0", "Smooth Order 1", "Smooth Order 2"};
+
+            if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 3))
+            {
+            }
+
+            if (ImGui::Button("Add Perlin Noise"))
+            {
+                m_terrain->GeneratePerlinNoise();
+                m_terrain->CalculateNTB();
+                m_terrain->BuildBuffer();
+            }
+
             //ToDo : select generating algorithm
             ImGui::Text("Terrain Width");
             if (ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width))
@@ -329,7 +343,6 @@ namespace GAM400
                 m_terrain->BuildBuffer();
             }
 
-
             ImGui::Text("Trigonometric Scale");
             if (ImGui::SliderFloat("##Terrain Trigonometric A", &m_terrain->m_trigonometric_factor_a, -1.0f, 1.0f))
             {
@@ -345,7 +358,6 @@ namespace GAM400
                 m_terrain->GenerateTrigonometric();
                 m_terrain->BuildBuffer();
             }
-
         }
     }
 

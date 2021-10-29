@@ -1,4 +1,6 @@
 #pragma once
+#include <map>
+
 #include "../../Math/Math.hpp"
 #include <vector>
 
@@ -10,6 +12,7 @@
 
 namespace GAM400
 {
+    class InstanceBufferCommon;
     class ConstantBufferCommon;
     class VertexBufferCommon;
     class IndexBufferCommon;
@@ -26,6 +29,15 @@ namespace GAM400
         Dot,
         Line,
         Face
+    };
+
+    struct InstancingSubMesh
+    {
+        VertexBufferCommon* vertex_buffer = nullptr;
+        IndexBufferCommon* index_buffer = nullptr;
+        InstanceBufferCommon* instance_buffer = nullptr;
+        std::vector<InstanceBufferData> instances;
+        U32                             max_count = 0;
     };
 
     class PrimitiveRenderer
@@ -51,6 +63,7 @@ namespace GAM400
 
         void Initialize(ShaderProgramCommon* color_shader);
         void Render(ConstantBufferCommon* matrix_buffer) const;
+        void RenderInstancing(ShaderProgramCommon* color_shader, ConstantBufferCommon* matrix_buffer) const;
         void Shutdown();
         void Clear();
 
@@ -66,6 +79,12 @@ namespace GAM400
         void   ReserveIndices(size_t adding_count, eRenderingMode mode);
         size_t VerticesSize(eRenderingMode mode) const;
         size_t IndicesSize(eRenderingMode mode) const;
+
+        void DrawPrimitiveInstancing(const Primitive& primitive, const Matrix44& transform, eRenderingMode mode, Color color = Color());
+        void DrawPrimitiveInstancing(const Primitive& primitive, const Transform& transform, eRenderingMode mode, Color color = Color());
+        void DrawPrimitiveInstancing(const Primitive& primitive, const Quaternion& orientation, const Vector3& position, eRenderingMode mode, Color color = Color());
+
+
     private:
         MatrixData           m_mvp_data;
         RendererCommon*      m_renderer = nullptr;
@@ -88,6 +107,10 @@ namespace GAM400
         std::vector<U32>               m_face_indices;
         VertexBufferCommon*            m_face_vertex_buffer = nullptr;
         IndexBufferCommon*             m_face_index_buffer  = nullptr;
+
+        //instancing
+        std::map<size_t, U32>               m_drawing_sub_ins_meshes;
+        std::map<size_t, InstancingSubMesh> m_sub_ins_mesh_table;
 
     public:
         const int CIRCULAR_VERTICES_COUNT    = 100;
