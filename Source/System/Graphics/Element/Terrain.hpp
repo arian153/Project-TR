@@ -44,6 +44,7 @@ namespace GAM400
         void ClearGrid();
 
         void GeneratePerlinNoise();
+        void AddPerlinNoise();
 
         void AddTexture(TextureCommon* texture);
         void ClearTexture();
@@ -71,10 +72,12 @@ namespace GAM400
         I32    m_width_div           = 400;
         I32    m_depth_div           = 400;
         size_t m_terrain_vertex_size = 0;
-        int    m_smooth_level    = 0;
+        int    m_smooth_level        = 0;
 
         Real m_trigonometric_factor_a = 0.3f;
         Real m_trigonometric_factor_b = 0.05f;
+        Real m_perlin_noise_scale     = 100.0f;
+        Real m_perlin_noise_density   = 100.0f;
 
         Matrix44 m_world;
 

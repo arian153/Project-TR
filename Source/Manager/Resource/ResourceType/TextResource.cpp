@@ -3,6 +3,42 @@
 
 namespace GAM400
 {
+    PixelData::RGB::RGB()
+        : r(0), g(0), b(0)
+    {
+    }
+
+    PixelData::RGB::RGB(Real value)
+        : r(value), g(value), b(value)
+    {
+    }
+
+    PixelData::RGB::RGB(Real red, Real green, Real blue)
+        : r(red), g(green), b(blue)
+    {
+    }
+
+    PixelData::PixelData()
+        : w(0), h(0), pixels(nullptr)
+    {
+    }
+
+    PixelData::PixelData(const U32& width, const U32& height)
+        : w(width), h(height), pixels(nullptr)
+    {
+        pixels = new RGB[w * h];
+        for (U32 i = 0; i < w * h; ++i)
+        {
+            pixels[i] = RGB(0.0f);
+        }
+    }
+
+    PixelData::~PixelData()
+    {
+        if (pixels != nullptr)
+            delete[] pixels;
+    }
+
     TextResource::TextResource(const std::wstring& path)
         : Resource(path)
     {
@@ -14,11 +50,23 @@ namespace GAM400
 
     void TextResource::Initialize()
     {
-        m_b_loaded = LoadText();
+        if (m_file_type_w == L".ppm")
+        {
+            m_b_loaded = LoadPPM();
+        }
+        else if (m_file_name_w == L".txt")
+        {
+            m_b_loaded = LoadText();
+        }
     }
 
     void TextResource::Shutdown()
     {
+        if (m_pixel_data != nullptr)
+        {
+            delete m_pixel_data;
+        }
+
         m_b_unloaded = true;
     }
 
@@ -49,5 +97,75 @@ namespace GAM400
     std::wstring TextResource::GetText() const
     {
         return m_text;
+    }
+
+    bool TextResource::LoadPPM()
+    {
+        // need to spec. binary mode for Windows users
+        std::ifstream file(m_file_name_m, std::ios::binary);
+        if (file.is_open())
+        {
+            m_pixel_data = new PixelData();
+
+            std::string header;
+            int         w, h, b;
+            file >> header;
+
+            if (strcmp(header.c_str(), "P6") != 0)
+            {
+                //Can't read input file
+                return false;
+            }
+            file >> w >> h >> b;
+            m_pixel_data->w      = w;
+            m_pixel_data->h      = h;
+            m_pixel_data->pixels = new PixelData::RGB[w * h];
+
+            // skip empty lines in necessary until we get to the binary data 
+            file.ignore(256, '\n');
+            unsigned char pixel[3];
+            // read each pixel one by one and convert bytes to floats
+            for (U32 i = 0; i < w * h; ++i)
+            {
+                file.read(reinterpret_cast<char*>(pixel), 3);
+                m_pixel_data->pixels[i].r = pixel[0] / 255.f;
+                m_pixel_data->pixels[i].g = pixel[1] / 255.f;
+                m_pixel_data->pixels[i].b = pixel[2] / 255.f;
+            }
+            file.close();
+            return true;
+        }
+
+        //can't open file.
+        file.close();
+        return false;
+    }
+
+    bool TextResource::SavePPM(PixelData* data, const std::string& new_path)
+    {
+        if (data->w == 0 || data->h == 0)
+        {
+            // Null size of data, can't save an empty ppm.
+            return false;
+        }
+        std::ofstream ofs(new_path, std::ios::binary);
+
+        if (ofs.is_open())
+        {
+            ofs << "P6\n" << data->w << " " << data->h << "\n255\n";
+            // loop over each pixel in the image, clamp and convert to byte format
+            for (int i = 0; i < data->w * data->h; ++i)
+            {
+                unsigned char r = static_cast<unsigned char>(std::min(1.f, data->pixels[i].r) * 255);
+                unsigned char g = static_cast<unsigned char>(std::min(1.f, data->pixels[i].g) * 255);
+                unsigned char b = static_cast<unsigned char>(std::min(1.f, data->pixels[i].b) * 255);
+                ofs << r << g << b;
+            }
+            ofs.close();
+            return true;
+        }
+        //Can't open file
+        ofs.close();
+        return false;
     }
 }

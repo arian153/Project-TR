@@ -292,17 +292,8 @@ namespace GAM400
                 m_terrain->BuildBuffer();
             }
 
-            ImGui::Text("Interpolation Mode");
-            const char* interpolation_mode[] = {"Smooth Order 0", "Smooth Order 1", "Smooth Order 2"};
-
-            if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 3))
+            if (ImGui::Button("Build Terrain"))
             {
-            }
-
-            if (ImGui::Button("Add Perlin Noise"))
-            {
-                m_terrain->GeneratePerlinNoise();
-                m_terrain->CalculateNTB();
                 m_terrain->BuildBuffer();
             }
 
@@ -356,6 +347,32 @@ namespace GAM400
             {
                 //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
                 m_terrain->GenerateTrigonometric();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Perlin Noise Scale");
+            if (ImGui::SliderFloat("##Perlin Noise Scale", &m_terrain->m_perlin_noise_scale, 1.0f, 400.0f))
+            {
+                m_terrain->GeneratePerlinNoise();
+                m_terrain->CalculateNTB();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Perlin Noise Density");
+            if (ImGui::SliderFloat("##Perlin Noise Density", &m_terrain->m_perlin_noise_density, 1.0f, 400.0f))
+            {
+                m_terrain->GeneratePerlinNoise();
+                m_terrain->CalculateNTB();
+                m_terrain->BuildBuffer();
+            }
+
+            ImGui::Text("Interpolation Mode");
+            const char* interpolation_mode[] = {"Smooth Order Linear", "Smooth Order Cubic", "Smooth Order Quintic", "Smooth Order Septic"};
+
+            if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 4))
+            {
+                m_terrain->GeneratePerlinNoise();
+                m_terrain->CalculateNTB();
                 m_terrain->BuildBuffer();
             }
         }

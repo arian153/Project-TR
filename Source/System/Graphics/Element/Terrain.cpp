@@ -193,7 +193,29 @@ namespace GAM400
         {
             Vector3 p = m_grid.vertices[i].GetPosition();
             Vector3 d;
-            p.y += m_noise_utility.Noise(Vector3(p.x + half_width, p.y, p.z + half_depth), d, m_smooth_level, true);
+            p.y = m_perlin_noise_scale * m_noise_utility.Noise(Vector3(
+                (p.x + half_width) / m_perlin_noise_density,
+                0.0f, 
+                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, true);
+            m_grid.vertices[i].SetPosition(p);
+        }
+    }
+
+    void Terrain::AddPerlinNoise()
+    {
+        Real half_width = m_terrain_width * 0.5f;
+        Real half_depth = m_terrain_depth * 0.5f;
+
+        size_t size = m_grid.vertices.size();
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            Vector3 p = m_grid.vertices[i].GetPosition();
+            Vector3 d;
+            p.y += m_perlin_noise_scale * m_noise_utility.Noise(Vector3(
+                (p.x + half_width) / m_perlin_noise_density,
+                0.0f,
+                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, true);
             m_grid.vertices[i].SetPosition(p);
         }
     }

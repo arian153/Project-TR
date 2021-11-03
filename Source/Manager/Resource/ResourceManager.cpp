@@ -826,7 +826,7 @@ namespace GAM400
             resource = new JsonResource(path);
             m_json_resource_map.emplace(path, (JsonResource*)resource);
         }
-        else if (type == L".txt")
+        else if (type == L".txt" || type == L".ppm")
         {
             resource = new TextResource(path);
             m_text_resource_map.emplace(path, (TextResource*)resource);
