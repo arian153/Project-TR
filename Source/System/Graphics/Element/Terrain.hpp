@@ -62,6 +62,7 @@ namespace GAM400
 
         void CalculateNTB();
         void CalculateGridIndices();
+        void SetNoiseSeed(U32 seed);
 
     private:
         friend class TerrainComponent;
@@ -78,6 +79,7 @@ namespace GAM400
         Real m_trigonometric_factor_b = 0.05f;
         Real m_perlin_noise_scale     = 100.0f;
         Real m_perlin_noise_density   = 100.0f;
+        bool m_b_noise_user_random    = true;
 
         Matrix44 m_world;
 

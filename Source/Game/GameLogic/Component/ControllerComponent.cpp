@@ -75,7 +75,7 @@ namespace Game
                     // Update angles based on input to orbit camera around box.
                     m_radius += 2.0f * mouse->MouseWheelRollingDirection();
                     // Restrict the radius.
-                    m_radius = Math::Clamp(m_radius, 5.0f, 150.0f);
+                    m_radius = Math::Clamp(m_radius, 5.0f, 1000.0f);
                     // Convert Spherical to Cartesian coordinates.
                     eye_pos.x = m_radius * sinf(m_phi) * cosf(m_theta);
                     eye_pos.z = m_radius * sinf(m_phi) * sinf(m_theta);

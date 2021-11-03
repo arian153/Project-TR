@@ -27,6 +27,7 @@ namespace GAM400
             m_terrain->ClearGrid();
             m_terrain->GenerateTrigonometric();
             m_terrain->BuildBuffer();
+            m_terrain->SetNoiseSeed(m_noise_seed);
             m_terrain->m_component = this;
         }
     }
@@ -374,6 +375,25 @@ namespace GAM400
                 m_terrain->GeneratePerlinNoise();
                 m_terrain->CalculateNTB();
                 m_terrain->BuildBuffer();
+            }
+
+            if (ImGui::Checkbox("Use Random Seed##RandOrPerm", &m_terrain->m_b_noise_user_random))
+            {
+                m_terrain->GeneratePerlinNoise();
+                m_terrain->CalculateNTB();
+                m_terrain->BuildBuffer();
+            }
+
+            if (m_terrain->m_b_noise_user_random)
+            {
+                ImGui::Text("Noise Seed");
+                if (ImGui::SliderInt("##Slider Seed", (int*)&m_noise_seed, 0, 999999))
+                {
+                    m_terrain->SetNoiseSeed(m_noise_seed);
+                    m_terrain->GeneratePerlinNoise();
+                    m_terrain->CalculateNTB();
+                    m_terrain->BuildBuffer();
+                }
             }
         }
     }

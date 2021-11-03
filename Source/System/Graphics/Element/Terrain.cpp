@@ -196,7 +196,7 @@ namespace GAM400
             p.y = m_perlin_noise_scale * m_noise_utility.Noise(Vector3(
                 (p.x + half_width) / m_perlin_noise_density,
                 0.0f, 
-                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, true);
+                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
             m_grid.vertices[i].SetPosition(p);
         }
     }
@@ -215,7 +215,7 @@ namespace GAM400
             p.y += m_perlin_noise_scale * m_noise_utility.Noise(Vector3(
                 (p.x + half_width) / m_perlin_noise_density,
                 0.0f,
-                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, true);
+                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
             m_grid.vertices[i].SetPosition(p);
         }
     }
@@ -363,5 +363,10 @@ namespace GAM400
             m_point_indices[face.b].faces.emplace_back(face.a, face.b, face.c);
             m_point_indices[face.c].faces.emplace_back(face.a, face.b, face.c);
         }
+    }
+
+    void Terrain::SetNoiseSeed(U32 seed)
+    {
+        m_noise_utility.SetSeed(seed);
     }
 }

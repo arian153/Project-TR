@@ -37,5 +37,7 @@ namespace GAM400
         Terrain*           m_terrain = nullptr;
         MaterialIdentifier m_material_identifier;
         MaterialColor      m_material_color;
+
+        U32 m_noise_seed = 142356;
     };
 }
