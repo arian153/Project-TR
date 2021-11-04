@@ -719,6 +719,17 @@ namespace GAM400
         }
     }
 
+    void ResourceManager::GetTextResources(const std::string& file_type, std::vector<TextResource*>& resources)
+    {
+        for (auto& [path, resource] : m_text_resource_map)
+        {
+            if (resource->FileType() == file_type)
+            {
+                resources.push_back(resource);
+            }
+        }
+    }
+
     UndefinedResource* ResourceManager::GetUndefinedResource(const std::wstring& path)
     {
         auto found = m_undefined_resource_map.find(path);
@@ -787,13 +798,13 @@ namespace GAM400
             ((ShaderResource*)resource)->SetStage(eShaderStage::IntegratedShader);
             m_shader_resource_map.emplace(path, (ShaderResource*)resource);
         }
-        else if( type == L".ps")
+        else if (type == L".ps")
         {
             resource = new ShaderResource(path);
             ((ShaderResource*)resource)->SetStage(eShaderStage::PixelShader);
             m_shader_resource_map.emplace(path, (ShaderResource*)resource);
         }
-        else if( type == L".vs")
+        else if (type == L".vs")
         {
             resource = new ShaderResource(path);
             ((ShaderResource*)resource)->SetStage(eShaderStage::VertexShader);

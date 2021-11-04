@@ -8,6 +8,7 @@
 #include "../../Object/Object.hpp"
 #include "../../Resource/ResourceManager.hpp"
 #include "../../Resource/ResourceType/JsonResource.hpp"
+#include "../../Resource/ResourceType/TextResource.hpp"
 #include "../../Resource/ResourceType/TextureResource.hpp"
 #include "../../Space/Space.hpp"
 
@@ -250,6 +251,16 @@ namespace GAM400
             m_terrain->AddTexture(m_space->GetResourceManager()->GetTextureResource(L"DefaultTexture")->GetTexture());
         }
 
+        m_height_maps.clear();
+        m_space->GetResourceManager()->GetTextResources(".ppm", m_height_maps);
+        m_height_map_idx = -1;
+        m_height_map_names.clear();
+        for (auto& resource : m_height_maps)
+        {
+            std::string name = resource->FileName() + resource->FileType();
+            m_height_map_names.push_back(name);
+        }
+
         return true;
     }
 
@@ -283,7 +294,7 @@ namespace GAM400
             {
                 m_terrain->UpdateMaterialBuffer();
             }
-
+            ImGui::Separator();
             ImGui::NewLine();
             ImGui::Text("Terrain");
 
@@ -298,101 +309,280 @@ namespace GAM400
                 m_terrain->BuildBuffer();
             }
 
-            //ToDo : select generating algorithm
-            ImGui::Text("Terrain Width");
-            if (ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width))
+            if (ImGui::SliderInt("##W_IDX", &m_w_idx, 0, m_terrain->m_width_div - 1))
             {
-                m_terrain->m_terrain_width = Math::Max(m_terrain->m_terrain_width, 1.0f);
-                m_terrain->ClearGrid();
-                m_terrain->GenerateTrigonometric();
-                m_terrain->BuildBuffer();
+            }
+            if (ImGui::SliderInt("##D_IDX", &m_d_idx, 0, m_terrain->m_depth_div - 1))
+            {
             }
 
-            ImGui::Text("Terrain Depth");
-            if (ImGui::InputFloat("##Terrain Depth", &m_terrain->m_terrain_depth))
+            Vector3 pos    = m_terrain->m_grid.vertices[m_d_idx * m_terrain->m_width_div + m_w_idx].GetPosition();
+            Real    height = pos.y;
+            if (ImGui::InputFloat("##Height IDX", &height))
             {
-                m_terrain->m_terrain_depth = Math::Max(m_terrain->m_terrain_depth, 1.0f);
-                m_terrain->ClearGrid();
-                m_terrain->GenerateTrigonometric();
-                m_terrain->BuildBuffer();
-            }
-
-            ImGui::Text("Width LOD");
-            if (ImGui::InputInt("##LOD Width", &m_terrain->m_width_div))
-            {
-                m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
-                m_terrain->ClearGrid();
-                m_terrain->GenerateTrigonometric();
-                m_terrain->BuildBuffer();
-            }
-
-            ImGui::Text("Depth LOD");
-            if (ImGui::InputInt("##LOD Depth", &m_terrain->m_depth_div))
-            {
-                m_terrain->m_depth_div = Math::Max(m_terrain->m_depth_div, 1);
-                m_terrain->ClearGrid();
-                m_terrain->GenerateTrigonometric();
-                m_terrain->BuildBuffer();
-            }
-
-            ImGui::Text("Trigonometric Scale");
-            if (ImGui::SliderFloat("##Terrain Trigonometric A", &m_terrain->m_trigonometric_factor_a, -1.0f, 1.0f))
-            {
-                //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
-                m_terrain->GenerateTrigonometric();
-                m_terrain->BuildBuffer();
-            }
-
-            ImGui::Text("Trigonometric Density");
-            if (ImGui::SliderFloat("##Terrain Trigonometric B", &m_terrain->m_trigonometric_factor_b, -0.3f, 0.3f))
-            {
-                //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
-                m_terrain->GenerateTrigonometric();
-                m_terrain->BuildBuffer();
-            }
-
-            ImGui::Text("Perlin Noise Scale");
-            if (ImGui::SliderFloat("##Perlin Noise Scale", &m_terrain->m_perlin_noise_scale, 1.0f, 400.0f))
-            {
-                m_terrain->GeneratePerlinNoise();
+                pos.y = height;
+                m_terrain->m_grid.vertices[m_d_idx * m_terrain->m_width_div + m_w_idx].SetPosition(pos);
                 m_terrain->CalculateNTB();
                 m_terrain->BuildBuffer();
             }
 
-            ImGui::Text("Perlin Noise Density");
-            if (ImGui::SliderFloat("##Perlin Noise Density", &m_terrain->m_perlin_noise_density, 1.0f, 400.0f))
-            {
-                m_terrain->GeneratePerlinNoise();
-                m_terrain->CalculateNTB();
-                m_terrain->BuildBuffer();
-            }
+            ImGui::Text("Terrain Generation Method");
+            const char* terrain_gen[] = {"Height-Map", "Trigonometric", "Perlin-Noise"};
 
-            ImGui::Text("Interpolation Mode");
-            const char* interpolation_mode[] = {"Smooth Order Linear", "Smooth Order Cubic", "Smooth Order Quintic", "Smooth Order Septic"};
-
-            if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 4))
+            if (ImGui::Combo("##Terrain Generation Mode", &m_terrain_mode, terrain_gen, 3))
             {
-                m_terrain->GeneratePerlinNoise();
-                m_terrain->CalculateNTB();
-                m_terrain->BuildBuffer();
-            }
-
-            if (ImGui::Checkbox("Use Random Seed##RandOrPerm", &m_terrain->m_b_noise_user_random))
-            {
-                m_terrain->GeneratePerlinNoise();
-                m_terrain->CalculateNTB();
-                m_terrain->BuildBuffer();
-            }
-
-            if (m_terrain->m_b_noise_user_random)
-            {
-                ImGui::Text("Noise Seed");
-                if (ImGui::SliderInt("##Slider Seed", (int*)&m_noise_seed, 0, 999999))
+                if (m_terrain_mode == 0)
                 {
-                    m_terrain->SetNoiseSeed(m_noise_seed);
+                    if (m_height_map_idx != -1)
+                    {
+                        auto resource = m_height_maps[m_height_map_idx];
+
+                        auto pixel_data = resource->GetPixelData();
+                        if (pixel_data != nullptr)
+                        {
+                            U32 width = pixel_data->w;
+                            U32 depth = pixel_data->h;
+
+                            m_terrain->m_terrain_width = (Real)width;
+                            m_terrain->m_terrain_depth = (Real)depth;
+                            m_terrain->m_width_div     = (I32)width;
+                            m_terrain->m_depth_div     = (I32)depth;
+                            m_terrain->ClearGrid();
+
+                            for (U32 w = 0; w < width; ++w)
+                            {
+                                for (U32 d = 0; d < depth; ++d)
+                                {
+                                    U32     i     = d * width + w;
+                                    Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
+                                    Real    scale = pixel_data->pixels[i].r;
+                                    p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
+                                    m_terrain->m_grid.vertices[i].SetPosition(p);
+                                }
+                            }
+
+                            m_terrain->CalculateNTB();
+                            m_terrain->BuildBuffer();
+                        }
+                    }
+                }
+                else if (m_terrain_mode == 1)
+                {
+                    m_terrain->ClearGrid();
+                    m_terrain->GenerateTrigonometric();
+                    m_terrain->BuildBuffer();
+                }
+                else if (m_terrain_mode == 2)
+                {
+                    m_terrain->ClearGrid();
                     m_terrain->GeneratePerlinNoise();
                     m_terrain->CalculateNTB();
                     m_terrain->BuildBuffer();
+                }
+            }
+
+            if (m_terrain_mode > 0)
+            {
+                ImGui::Text("Terrain Width");
+                if (ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width))
+                {
+                    m_terrain->m_terrain_width = Math::Max(m_terrain->m_terrain_width, 1.0f);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        m_terrain->CalculateNTB();
+                    }
+                    m_terrain->BuildBuffer();
+                }
+
+                ImGui::Text("Terrain Depth");
+                if (ImGui::InputFloat("##Terrain Depth", &m_terrain->m_terrain_depth))
+                {
+                    m_terrain->m_terrain_depth = Math::Max(m_terrain->m_terrain_depth, 1.0f);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        m_terrain->CalculateNTB();
+                    }
+                    m_terrain->BuildBuffer();
+                }
+
+                ImGui::Text("Width LOD");
+                if (ImGui::InputInt("##LOD Width", &m_terrain->m_width_div))
+                {
+                    m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        m_terrain->CalculateNTB();
+                    }
+                    m_terrain->BuildBuffer();
+                }
+
+                ImGui::Text("Depth LOD");
+                if (ImGui::InputInt("##LOD Depth", &m_terrain->m_depth_div))
+                {
+                    m_terrain->m_depth_div = Math::Max(m_terrain->m_depth_div, 1);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        m_terrain->CalculateNTB();
+                    }
+
+                    m_terrain->BuildBuffer();
+                }
+            }
+
+            if (m_terrain_mode == 1)
+            {
+                ImGui::Text("Trigonometric Scale");
+                if (ImGui::SliderFloat("##Terrain Trigonometric A", &m_terrain->m_trigonometric_factor_a, -1.0f, 1.0f))
+                {
+                    //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                    m_terrain->GenerateTrigonometric();
+                    m_terrain->BuildBuffer();
+                }
+
+                ImGui::Text("Trigonometric Density");
+                if (ImGui::SliderFloat("##Terrain Trigonometric B", &m_terrain->m_trigonometric_factor_b, -0.3f, 0.3f))
+                {
+                    //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                    m_terrain->GenerateTrigonometric();
+                    m_terrain->BuildBuffer();
+                }
+            }
+
+            else if (m_terrain_mode == 2)
+            {
+                ImGui::Separator();
+                ImGui::Text("Perlin Noise Scale");
+                if (ImGui::SliderFloat("##Perlin Noise Scale", &m_terrain->m_perlin_noise_scale, 1.0f, 400.0f))
+                {
+                    m_terrain->GeneratePerlinNoise();
+                    m_terrain->CalculateNTB();
+                    m_terrain->BuildBuffer();
+                }
+
+                ImGui::Text("Perlin Noise Density");
+                if (ImGui::SliderFloat("##Perlin Noise Density", &m_terrain->m_perlin_noise_density, 1.0f, 400.0f))
+                {
+                    m_terrain->GeneratePerlinNoise();
+                    m_terrain->CalculateNTB();
+                    m_terrain->BuildBuffer();
+                }
+
+                ImGui::Text("Interpolation Mode");
+                const char* interpolation_mode[] = {"Smooth Order Linear", "Smooth Order Cubic", "Smooth Order Quintic", "Smooth Order Septic"};
+
+                if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 4))
+                {
+                    m_terrain->GeneratePerlinNoise();
+                    m_terrain->CalculateNTB();
+                    m_terrain->BuildBuffer();
+                }
+
+                if (ImGui::Checkbox("Use Random Seed##RandOrPerm", &m_terrain->m_b_noise_user_random))
+                {
+                    m_terrain->GeneratePerlinNoise();
+                    m_terrain->CalculateNTB();
+                    m_terrain->BuildBuffer();
+                }
+
+                if (m_terrain->m_b_noise_user_random)
+                {
+                    ImGui::Text("Noise Seed");
+                    if (ImGui::SliderInt("##Slider Seed", (int*)&m_noise_seed, 0, 999999))
+                    {
+                        m_terrain->SetNoiseSeed(m_noise_seed);
+                        m_terrain->GeneratePerlinNoise();
+                        m_terrain->CalculateNTB();
+                        m_terrain->BuildBuffer();
+                    }
+                }
+            }
+            else if (m_terrain_mode == 0)
+            {
+                ImGui::Text("Height Map");
+
+                int height_map_count = (int)m_height_map_names.size();
+
+                if (ImGui::Combo("##Height Map Select", &m_height_map_idx, VectorStringGetter, (void*)&m_height_map_names, height_map_count))
+                {
+                    auto resource = m_height_maps[m_height_map_idx];
+
+                    auto pixel_data = resource->GetPixelData();
+                    if (pixel_data != nullptr)
+                    {
+                        U32 width = pixel_data->w;
+                        U32 depth = pixel_data->h;
+
+                        m_terrain->m_terrain_width = (Real)width;
+                        m_terrain->m_terrain_depth = (Real)depth;
+                        m_terrain->m_width_div     = (I32)width;
+                        m_terrain->m_depth_div     = (I32)depth;
+                        m_terrain->ClearGrid();
+
+                        for (U32 w = 0; w < width; ++w)
+                        {
+                            for (U32 d = 0; d < depth; ++d)
+                            {
+                                U32     i     = d * width + w;
+                                Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
+                                Real    scale = pixel_data->pixels[i].r;
+                                p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
+                                m_terrain->m_grid.vertices[i].SetPosition(p);
+                            }
+                        }
+
+                        m_terrain->CalculateNTB();
+                        m_terrain->BuildBuffer();
+                    }
+                }
+
+                ImGui::Text("Height Map Scale");
+                if (ImGui::SliderFloat("##Height Map Scale", &m_terrain->m_height_map_scale, 1.0f, 400.0f))
+                {
+                    auto resource = m_height_maps[m_height_map_idx];
+
+                    auto pixel_data = resource->GetPixelData();
+                    if (pixel_data != nullptr)
+                    {
+                        U32 width = pixel_data->w;
+                        U32 depth = pixel_data->h;
+
+                        m_terrain->m_terrain_width = (Real)width;
+                        m_terrain->m_terrain_depth = (Real)depth;
+                        m_terrain->m_width_div     = (I32)width;
+                        m_terrain->m_depth_div     = (I32)depth;
+                        m_terrain->ClearGrid();
+
+                        for (U32 w = 0; w < width; ++w)
+                        {
+                            for (U32 d = 0; d < depth; ++d)
+                            {
+                                U32     i     = d * width + w;
+                                Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
+                                Real    scale = pixel_data->pixels[i].r;
+                                p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
+                                m_terrain->m_grid.vertices[i].SetPosition(p);
+                            }
+                        }
+
+                        m_terrain->CalculateNTB();
+                        m_terrain->BuildBuffer();
+                    }
                 }
             }
         }

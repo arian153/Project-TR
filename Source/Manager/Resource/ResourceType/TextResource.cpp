@@ -3,17 +3,17 @@
 
 namespace GAM400
 {
-    PixelData::RGB::RGB()
+    PixelData::PixelRGB::PixelRGB()
         : r(0), g(0), b(0)
     {
     }
 
-    PixelData::RGB::RGB(Real value)
+    PixelData::PixelRGB::PixelRGB(Real value)
         : r(value), g(value), b(value)
     {
     }
 
-    PixelData::RGB::RGB(Real red, Real green, Real blue)
+    PixelData::PixelRGB::PixelRGB(Real red, Real green, Real blue)
         : r(red), g(green), b(blue)
     {
     }
@@ -26,10 +26,10 @@ namespace GAM400
     PixelData::PixelData(const U32& width, const U32& height)
         : w(width), h(height), pixels(nullptr)
     {
-        pixels = new RGB[w * h];
+        pixels = new PixelRGB[w * h];
         for (U32 i = 0; i < w * h; ++i)
         {
-            pixels[i] = RGB(0.0f);
+            pixels[i] = PixelRGB(0.0f);
         }
     }
 
@@ -54,7 +54,7 @@ namespace GAM400
         {
             m_b_loaded = LoadPPM();
         }
-        else if (m_file_name_w == L".txt")
+        else if (m_file_type_w == L".txt")
         {
             m_b_loaded = LoadText();
         }
@@ -102,7 +102,7 @@ namespace GAM400
     bool TextResource::LoadPPM()
     {
         // need to spec. binary mode for Windows users
-        std::ifstream file(m_file_name_m, std::ios::binary);
+        std::ifstream file(m_file_path_m, std::ios::binary);
         if (file.is_open())
         {
             m_pixel_data = new PixelData();
@@ -119,7 +119,7 @@ namespace GAM400
             file >> w >> h >> b;
             m_pixel_data->w      = w;
             m_pixel_data->h      = h;
-            m_pixel_data->pixels = new PixelData::RGB[w * h];
+            m_pixel_data->pixels = new PixelData::PixelRGB[w * h];
 
             // skip empty lines in necessary until we get to the binary data 
             file.ignore(256, '\n');
@@ -167,5 +167,10 @@ namespace GAM400
         //Can't open file
         ofs.close();
         return false;
+    }
+
+    PixelData* TextResource::GetPixelData() const
+    {
+        return m_pixel_data;
     }
 }

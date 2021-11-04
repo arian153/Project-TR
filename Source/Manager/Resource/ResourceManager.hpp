@@ -71,6 +71,7 @@ namespace GAM400
         TextResource* GetTextResource(const std::wstring& path);
         TextResource* GetTextResourceFileName(const std::wstring& file_name);
         void          GetTextResources(const std::wstring& file_name, std::vector<TextResource*>& resources);
+        void          GetTextResources(const std::string& file_type, std::vector<TextResource*>& resources);
 
         //undefined
         UndefinedResource* GetUndefinedResource(const std::wstring& path);

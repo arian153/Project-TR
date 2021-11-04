@@ -8,11 +8,11 @@ namespace GAM400
     class PixelData
     {
     public:
-        struct RGB
+        struct PixelRGB
         {
-            RGB();
-            explicit RGB(Real value);
-            RGB(Real red, Real green, Real blue);
+            PixelRGB();
+            explicit PixelRGB(Real value);
+            PixelRGB(Real red, Real green, Real blue);
 
         public:
             Real r, g, b;
@@ -23,7 +23,7 @@ namespace GAM400
         ~PixelData();
 
         U32  w, h;
-        RGB* pixels;
+        PixelRGB* pixels;
     };
 
     class TextResource final : public Resource
@@ -38,8 +38,10 @@ namespace GAM400
 
         std::wstring GetText() const;
 
-        bool LoadPPM();
-       static bool SavePPM(PixelData* data, const std::string& new_path);
+        bool        LoadPPM();
+        static bool SavePPM(PixelData* data, const std::string& new_path);
+
+        PixelData* GetPixelData() const;
 
     private:
         std::wstring m_text       = L"";

@@ -1,11 +1,15 @@
 #pragma once
 
+#include <vector>
+
 #include "..//Component.hpp"
 #include "../../../System/Graphics/DataType/MaterialData.hpp"
 #include "../../../System/Math/Utility/VectorDef.hpp"
 
 namespace GAM400
 {
+    class TextResource;
+
     class TerrainComponent final : public Component
     {
     public:
@@ -38,6 +42,14 @@ namespace GAM400
         MaterialIdentifier m_material_identifier;
         MaterialColor      m_material_color;
 
+        std::vector<TextResource*> m_height_maps;
+        std::vector<std::string> m_height_map_names;
+        int m_height_map_idx;
+
         U32 m_noise_seed = 142356;
+        int m_terrain_mode = 1;
+
+        int m_w_idx = 0;
+        int m_d_idx = 0;
     };
 }
