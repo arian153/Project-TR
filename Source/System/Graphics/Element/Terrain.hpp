@@ -15,12 +15,6 @@ namespace GAM400
     class VertexBufferCommon;
     class IndexBufferCommon;
 
-    struct TerrainNode
-    {
-        TerrainNode* parent = nullptr;
-        TerrainNode* children[4]; //4 child node
-    };
-
     class Terrain
     {
     public:
