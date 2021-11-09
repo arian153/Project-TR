@@ -6,6 +6,8 @@
 
 namespace GAM400
 {
+    class Ray;
+
     class TerrainFace
     {
     public:
@@ -13,6 +15,7 @@ namespace GAM400
         ~TerrainFace() = default;
 
         TerrainFace(U32 a, U32 b, U32 c);
+        bool HasIntersection(const Ray& ray, Real& t) const;
 
     private:
         Vector3 vertex_a, vertex_b, vertex_c;

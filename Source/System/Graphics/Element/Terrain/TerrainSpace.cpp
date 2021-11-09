@@ -311,6 +311,7 @@ namespace GAM400
 
     SubTerrain* TerrainSpace::Pick(const Vector3& point) const
     {
+        return nullptr;
     }
 
     void TerrainSpace::Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const

@@ -26,8 +26,9 @@ namespace GAM400
     PixelData::PixelData(const U32& width, const U32& height)
         : w(width), h(height), pixels(nullptr)
     {
-        pixels = new PixelRGB[w * h];
-        for (U32 i = 0; i < w * h; ++i)
+        size_t size = (size_t)w * h;
+        pixels      = new PixelRGB[size];
+        for (U32 i = 0; i < size; ++i)
         {
             pixels[i] = PixelRGB(0.0f);
         }
@@ -119,18 +120,20 @@ namespace GAM400
             file >> w >> h >> b;
             m_pixel_data->w      = w;
             m_pixel_data->h      = h;
-            m_pixel_data->pixels = new PixelData::PixelRGB[w * h];
+            size_t size          = (size_t)w * h;
+            m_pixel_data->pixels = new PixelData::PixelRGB[size];
 
             // skip empty lines in necessary until we get to the binary data 
             file.ignore(256, '\n');
             unsigned char pixel[3];
             // read each pixel one by one and convert bytes to floats
-            for (U32 i = 0; i < w * h; ++i)
+
+            for (size_t i = 0; i < size; ++i)
             {
                 file.read(reinterpret_cast<char*>(pixel), 3);
-                m_pixel_data->pixels[i].r = pixel[0] / 255.f;
-                m_pixel_data->pixels[i].g = pixel[1] / 255.f;
-                m_pixel_data->pixels[i].b = pixel[2] / 255.f;
+                m_pixel_data->pixels[i].r = (Real)pixel[0] / 255.f;
+                m_pixel_data->pixels[i].g = (Real)pixel[1] / 255.f;
+                m_pixel_data->pixels[i].b = (Real)pixel[2] / 255.f;
             }
             file.close();
             return true;
@@ -154,7 +157,8 @@ namespace GAM400
         {
             ofs << "P6\n" << data->w << " " << data->h << "\n255\n";
             // loop over each pixel in the image, clamp and convert to byte format
-            for (int i = 0; i < data->w * data->h; ++i)
+            size_t size = (size_t)data->w * data->h;
+            for (int i = 0; i < size; ++i)
             {
                 unsigned char r = static_cast<unsigned char>(std::min(1.f, data->pixels[i].r) * 255);
                 unsigned char g = static_cast<unsigned char>(std::min(1.f, data->pixels[i].g) * 255);
