@@ -60,6 +60,7 @@ namespace GAM400
 
     private:
         friend class TerrainComponent;
+        friend class TerrainSpace;
 
     private:
         Real   m_terrain_width       = 400.0f;

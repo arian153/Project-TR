@@ -1,5 +1,6 @@
 #include "TerrainSpace.hpp"
 
+#include "../Terrain.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
 
 namespace GAM400
@@ -287,6 +288,34 @@ namespace GAM400
 
     void TerrainSpace::Initialize()
     {
+        if (m_root != nullptr)
+        {
+            Shutdown();
+        }
+
+        m_cell_depth = m_terrain->m_terrain_depth;
+        m_cell_width = m_terrain->m_terrain_width;
+
+        m_tree_height = 0;
+        while (m_cell_depth > m_size_threshold || m_cell_width > m_size_threshold)
+        {
+            m_cell_depth *= 0.5f;
+            m_cell_width *= 0.5f;
+            m_tree_height++;
+        }
+
+        size_t size = m_terrain->m_grid.faces.size();
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            //Face
+            m_terrain->m_grid.faces[i].a;
+            m_terrain->m_grid.faces[i].b;
+            m_terrain->m_grid.faces[i].c;
+
+
+
+        }
     }
 
     void TerrainSpace::Update(Real dt)

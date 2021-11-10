@@ -6,6 +6,7 @@
 
 namespace GAM400
 {
+    class Terrain;
     class PrimitiveRenderer;
     class Ray;
     class SpaceNode;
@@ -54,8 +55,6 @@ namespace GAM400
         SubTerrain  sub_terrain;
     };
 
-   
-
     class TerrainSpace
     {
     public:
@@ -65,8 +64,6 @@ namespace GAM400
         void Initialize();
         void Update(Real dt);
         void Shutdown();
-        //void Add(SubTerrain* aabb);
-        //void Remove(SubTerrain* aabb);
         void Clear();
         void Release();
         void Render(PrimitiveRenderer* primitive_renderer);
@@ -77,6 +74,11 @@ namespace GAM400
         //void CastRay(RayCastResult& result, Real max_distance = -1.0f) const;
 
     private:
-        SpaceNode* m_root = nullptr;
+        Terrain*   m_terrain        = nullptr;
+        SpaceNode* m_root           = nullptr;
+        Real       m_cell_width     = 100.0f;
+        Real       m_cell_depth     = 100.0f;
+        int        m_tree_height    = 0;
+        Real       m_size_threshold = 20.0f;
     };
 }

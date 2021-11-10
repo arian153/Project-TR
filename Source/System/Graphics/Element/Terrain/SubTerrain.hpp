@@ -3,9 +3,11 @@
 
 #include "../../../Core/Utility/CoreDef.hpp"
 #include "../../../Math/Algebra/Vector3.hpp"
+#include "../../DataType/MeshInfo.hpp"
 
 namespace GAM400
 {
+    class MeshData;
     class Ray;
 
     class TerrainFace
@@ -14,7 +16,8 @@ namespace GAM400
         TerrainFace() = default;
         ~TerrainFace() = default;
 
-        TerrainFace(U32 a, U32 b, U32 c);
+        TerrainFace(U32 a, U32 b, U32 c, MeshData* terrain_data);
+        void Update(MeshData* terrain_data);
         bool HasIntersection(const Ray& ray, Real& t) const;
 
     private:
@@ -27,6 +30,9 @@ namespace GAM400
     public:
         SubTerrain();
         ~SubTerrain();
+
+        void Update(MeshData* terrain_data);
+        bool HasIntersection(const Ray& ray, Real& t) const;
 
     private:
         std::vector<TerrainFace> faces;
