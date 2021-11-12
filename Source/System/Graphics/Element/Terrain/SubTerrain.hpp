@@ -13,14 +13,14 @@ namespace GAM400
     class TerrainFace
     {
     public:
-        TerrainFace() = default;
+        TerrainFace()  = default;
         ~TerrainFace() = default;
 
-        TerrainFace(U32 a, U32 b, U32 c, MeshData* terrain_data);
-        void Update(MeshData* terrain_data);
+        TerrainFace(U32 a, U32 b, U32 c, const MeshData& terrain_data);
+        void Update(const MeshData& terrain_data);
         bool HasIntersection(const Ray& ray, Real& t) const;
 
-    private:
+    public:
         Vector3 vertex_a, vertex_b, vertex_c;
         U32     idx_a,    idx_b,    idx_c;
     };
@@ -31,10 +31,14 @@ namespace GAM400
         SubTerrain();
         ~SubTerrain();
 
-        void Update(MeshData* terrain_data);
+        void AddFace(U32 a, U32 b, U32 c, const MeshData& terrain_data);
+        void Update(const MeshData& terrain_data);
         bool HasIntersection(const Ray& ray, Real& t) const;
 
-    private:
+    public:
+        Real min_y = 0.0f;
+        Real max_y = 0.0f;
+
         std::vector<TerrainFace> faces;
     };
 }

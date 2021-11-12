@@ -178,6 +178,7 @@ namespace GAM400
     {
         MeshGenerator mesh_generator;
         mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, (U32)m_depth_div, (U32)m_width_div, m_grid);
+
         if (m_terrain_vertex_size != m_grid.vertices.size())
             CalculateGridIndices();
     }
@@ -193,10 +194,11 @@ namespace GAM400
         {
             Vector3 p = m_grid.vertices[i].GetPosition();
             Vector3 d;
-            p.y = m_perlin_noise_scale * m_noise_utility.Noise(Vector3(
-                (p.x + half_width) / m_perlin_noise_density,
-                0.0f, 
-                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
+            p.y = m_perlin_noise_scale * m_noise_utility.Noise(
+                                                               Vector3(
+                                                                       (p.x + half_width) / m_perlin_noise_density,
+                                                                       0.0f,
+                                                                       (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
             m_grid.vertices[i].SetPosition(p);
         }
     }
@@ -212,10 +214,11 @@ namespace GAM400
         {
             Vector3 p = m_grid.vertices[i].GetPosition();
             Vector3 d;
-            p.y += m_perlin_noise_scale * m_noise_utility.Noise(Vector3(
-                (p.x + half_width) / m_perlin_noise_density,
-                0.0f,
-                (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
+            p.y += m_perlin_noise_scale * m_noise_utility.Noise(
+                                                                Vector3(
+                                                                        (p.x + half_width) / m_perlin_noise_density,
+                                                                        0.0f,
+                                                                        (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
             m_grid.vertices[i].SetPosition(p);
         }
     }

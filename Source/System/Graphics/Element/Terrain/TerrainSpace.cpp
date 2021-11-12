@@ -2,6 +2,7 @@
 
 #include "../Terrain.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
+#include "../../../Math/Utility/Utility.hpp"
 
 namespace GAM400
 {
@@ -13,10 +14,16 @@ namespace GAM400
     {
     }
 
-    void TerrainAABB::Set(const Vector3& min, const Vector3& max)
+    void TerrainAABB::SetMinMax(const Vector3& min, const Vector3& max)
     {
         m_min = min;
         m_max = max;
+    }
+
+    void TerrainAABB::SetCenterHalfSize(const Vector3& center, const Vector3& half_size)
+    {
+        m_max = center + half_size;
+        m_min = center - half_size;
     }
 
     bool TerrainAABB::Intersect(TerrainAABB* aabb) const
@@ -65,6 +72,29 @@ namespace GAM400
             return false;
         }
         return true;
+    }
+
+    bool TerrainAABB::ContainsExceptY(const Vector3& point) const
+    {
+        if (m_min.x > point.x || point.x > m_max.x)
+        {
+            return false;
+        }
+        if (m_min.z > point.z || point.z > m_max.z)
+        {
+            return false;
+        }
+        return true;
+    }
+
+    bool TerrainAABB::ContainsExceptY(const Vector3& p0, const Vector3& p1, const Vector3& p2) const
+    {
+        return ContainsExceptY(p0) || ContainsExceptY(p1) || ContainsExceptY(p2);
+    }
+
+    bool TerrainAABB::ContainsExceptY(const TerrainFace& face) const
+    {
+        return ContainsExceptY(face.vertex_a) || ContainsExceptY(face.vertex_b) || ContainsExceptY(face.vertex_c);
     }
 
     bool TerrainAABB::Contains(TerrainAABB* aabb) const
@@ -304,34 +334,51 @@ namespace GAM400
             m_tree_height++;
         }
 
-        size_t size = m_terrain->m_grid.faces.size();
+        //build tree structure
+        m_root = CreateNode(nullptr);
 
+        Vector3 front = m_terrain->m_grid.vertices.front().GetPosition();
+        Vector3 back  = m_terrain->m_grid.vertices.back().GetPosition();
+        m_root->aabb.SetMinMax(
+                               Vector3(Math::Min(front.x, back.x), 0.0f, Math::Min(front.z, back.z)),
+                               Vector3(Math::Max(front.x, back.x), 0.0f, Math::Max(front.z, back.z)));
+
+        size_t size = m_terrain->m_grid.faces.size();
+        m_root->sub_terrain.faces.reserve(size);
         for (size_t i = 0; i < size; ++i)
         {
             //Face
-            m_terrain->m_grid.faces[i].a;
-            m_terrain->m_grid.faces[i].b;
-            m_terrain->m_grid.faces[i].c;
+            auto& face = m_terrain->m_grid.faces[i];
+            m_root->sub_terrain.AddFace(face.a, face.b, face.c, m_terrain->m_grid);
+        }
 
+        BuildTreeRecursive(m_root, 0);
 
-
+        for (auto& node : m_nodes)
+        {
+            if (node->IsLeaf())
+            {
+                m_leaves.push_back(node);
+            }
         }
     }
 
-    void TerrainSpace::Update(Real dt)
+    void TerrainSpace::Update([[maybe_unused]] Real dt)
     {
+        for (auto& leaf : m_leaves)
+        {
+            leaf->sub_terrain.Update(m_terrain->m_grid);
+        }
     }
 
     void TerrainSpace::Shutdown()
     {
-    }
-
-    void TerrainSpace::Clear()
-    {
-    }
-
-    void TerrainSpace::Release()
-    {
+        for (auto& node : m_nodes)
+        {
+            delete node;
+        }
+        m_nodes.clear();
+        m_leaves.clear();
     }
 
     void TerrainSpace::Render(PrimitiveRenderer* primitive_renderer)
@@ -345,5 +392,59 @@ namespace GAM400
 
     void TerrainSpace::Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const
     {
+    }
+
+    void TerrainSpace::BuildTreeRecursive(SpaceNode* node, int height)
+    {
+        if (height == m_tree_height)
+            return;
+
+        Vector3 center = node->aabb.Center();
+        Vector3 scale  = node->aabb.HalfSize();
+        Real    x_half = scale.x * 0.5f;
+        Real    z_half = scale.z * 0.5f;
+
+        node->children[0] = CreateNode(node);
+        node->children[0]->aabb.SetCenterHalfSize(center + Vector3(+x_half, 0.0f, +z_half), scale);
+        node->children[1] = CreateNode(node);
+        node->children[1]->aabb.SetCenterHalfSize(center + Vector3(+x_half, 0.0f, -z_half), scale);
+        node->children[2] = CreateNode(node);
+        node->children[2]->aabb.SetCenterHalfSize(center + Vector3(-x_half, 0.0f, +z_half), scale);
+        node->children[3] = CreateNode(node);
+        node->children[3]->aabb.SetCenterHalfSize(center + Vector3(-x_half, 0.0f, -z_half), scale);
+
+        size_t size       = node->sub_terrain.faces.size();
+        size_t child_size = size / 4 + (size_t)sqrtf((float)size);
+        for (size_t j = 0; j < 4; ++j)
+        {
+            node->children[j]->sub_terrain.faces.reserve(child_size);
+        }
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            for (size_t j = 0; j < 4; ++j)
+            {
+                if (node->children[j]->aabb.ContainsExceptY(node->sub_terrain.faces[i]))
+                {
+                    node->children[j]->sub_terrain.faces.push_back(node->sub_terrain.faces[i]);
+                }
+            }
+        }
+
+        node->sub_terrain.faces.clear();
+        int next_height = height + 1;
+
+        BuildTreeRecursive(node->children[0], next_height);
+        BuildTreeRecursive(node->children[1], next_height);
+        BuildTreeRecursive(node->children[2], next_height);
+        BuildTreeRecursive(node->children[3], next_height);
+    }
+
+    SpaceNode* TerrainSpace::CreateNode(SpaceNode* parent)
+    {
+        SpaceNode* node = new SpaceNode();
+        node->parent    = parent;
+        m_nodes.push_back(node);
+        return node;
     }
 }

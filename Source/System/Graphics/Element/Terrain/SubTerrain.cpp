@@ -1,24 +1,25 @@
 #include "SubTerrain.hpp"
 
 #include "../../../Math/Primitive/Others/Ray.hpp"
+#include "../../../Math/Utility/Utility.hpp"
 #include "../../../Math/Utility/Utility.inl"
 #include "../../DataType/MeshData.hpp"
 
 namespace GAM400
 {
-    TerrainFace::TerrainFace(U32 a, U32 b, U32 c, MeshData* terrain_data)
+    TerrainFace::TerrainFace(U32 a, U32 b, U32 c, const MeshData& terrain_data)
         : idx_a(a), idx_b(b), idx_c(c)
     {
-        vertex_a = terrain_data->vertices[a].GetPosition();
-        vertex_b = terrain_data->vertices[b].GetPosition();
-        vertex_c = terrain_data->vertices[c].GetPosition();
+        vertex_a = terrain_data.vertices[a].GetPosition();
+        vertex_b = terrain_data.vertices[b].GetPosition();
+        vertex_c = terrain_data.vertices[c].GetPosition();
     }
 
-    void TerrainFace::Update(MeshData* terrain_data)
+    void TerrainFace::Update(const MeshData& terrain_data)
     {
-        vertex_a = terrain_data->vertices[idx_a].GetPosition();
-        vertex_b = terrain_data->vertices[idx_b].GetPosition();
-        vertex_c = terrain_data->vertices[idx_c].GetPosition();
+        vertex_a = terrain_data.vertices[idx_a].GetPosition();
+        vertex_b = terrain_data.vertices[idx_b].GetPosition();
+        vertex_c = terrain_data.vertices[idx_c].GetPosition();
     }
 
     bool TerrainFace::HasIntersection(const Ray& ray, Real& t) const
@@ -62,11 +63,21 @@ namespace GAM400
     {
     }
 
-    void SubTerrain::Update(MeshData* terrain_data)
+    void SubTerrain::AddFace(U32 a, U32 b, U32 c, const MeshData& terrain_data)
     {
+        faces.emplace_back(a, b, c, terrain_data);
+    }
+
+    void SubTerrain::Update(const MeshData& terrain_data)
+    {
+        //reset y range [flt_max : -flt_max]
+        min_y = Math::REAL_POSITIVE_MAX;
+        max_y = Math::REAL_NEGATIVE_MAX;
         for (auto& face : faces)
         {
             face.Update(terrain_data);
+            min_y = Math::Min(Math::Min(Math::Min(face.vertex_a.y, face.vertex_b.y), face.vertex_c.y), min_y);
+            max_y = Math::Max(Math::Max(Math::Max(face.vertex_a.y, face.vertex_b.y), face.vertex_c.y), max_y);
         }
     }
 
