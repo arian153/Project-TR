@@ -1,5 +1,9 @@
 #include "TerrainSpace.hpp"
 
+#include <queue>
+
+
+#include "HitData.hpp"
 #include "../Terrain.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
 #include "../../../Math/Utility/Utility.hpp"
@@ -294,6 +298,10 @@ namespace GAM400
 
     SpaceNode::SpaceNode()
     {
+        children[0] = nullptr;
+        children[1] = nullptr;
+        children[2] = nullptr;
+        children[3] = nullptr;
     }
 
     SpaceNode::~SpaceNode()
@@ -308,6 +316,8 @@ namespace GAM400
         return children[0] == nullptr;
     }
 
+  
+
     TerrainSpace::TerrainSpace()
     {
     }
@@ -316,8 +326,9 @@ namespace GAM400
     {
     }
 
-    void TerrainSpace::Initialize()
+    void TerrainSpace::Initialize(Terrain* terrain)
     {
+        m_terrain = terrain;
         if (m_root != nullptr)
         {
             Shutdown();
@@ -363,7 +374,7 @@ namespace GAM400
         }
     }
 
-    void TerrainSpace::Update([[maybe_unused]] Real dt)
+    void TerrainSpace::Update()
     {
         for (auto& leaf : m_leaves)
         {
@@ -392,6 +403,56 @@ namespace GAM400
 
     void TerrainSpace::Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const
     {
+    }
+
+    void TerrainSpace::CastRay(HitData& result, Real max_distance) const
+    {
+        std::queue<SpaceNode*> queue;
+        if (m_root != nullptr)
+        {
+            queue.push(m_root);
+        }
+        Ray ray = result.ray;
+        while (!queue.empty())
+        {
+            SpaceNode& node = *queue.front();
+            queue.pop();
+            TerrainAABB& aabb   = node.aabb;
+            Real         aabb_t = Math::REAL_POSITIVE_MAX;
+            if (aabb.TestRayIntersection(ray, aabb_t, max_distance) == true)
+            {
+                // the node cannot possibly give closer results, skip
+                if (result.hit && result.t < aabb_t)
+                    continue;
+                if (node.IsLeaf() == true)
+                {
+                    SubTerrain& sub_terrain = node.sub_terrain;
+                    HitData     ray_cast_result(ray);
+                    sub_terrain.CastRay(ray_cast_result, max_distance);
+                    if (ray_cast_result.hit == true)
+                    {
+                        if (result.hit == true) // compare hit
+                        {
+                            if (ray_cast_result.t < result.t)
+                            {
+                                result = ray_cast_result;
+                            }
+                        }
+                        else // first hit
+                        {
+                            result = ray_cast_result;
+                        }
+                    }
+                }
+                else // is branch
+                {
+                    queue.push(node.children[0]);
+                    queue.push(node.children[1]);
+                    queue.push(node.children[2]);
+                    queue.push(node.children[3]);
+                }
+            }
+        }
     }
 
     void TerrainSpace::BuildTreeRecursive(SpaceNode* node, int height)

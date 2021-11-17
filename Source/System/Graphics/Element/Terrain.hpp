@@ -4,6 +4,7 @@
 #include "../Common/Texture/TextureArrayCommon.hpp"
 #include "../DataType/MaterialData.hpp"
 #include "../DataType/MeshData.hpp"
+#include "Terrain/TerrainSpace.hpp"
 
 namespace GAM400
 {
@@ -82,6 +83,7 @@ namespace GAM400
 
         PerlinNoise                     m_noise_utility;
         MeshData                        m_grid;
+        TerrainSpace                    m_space;
         std::vector<GeometryPointIndex> m_point_indices;
 
         TextureArrayCommon  m_textures;

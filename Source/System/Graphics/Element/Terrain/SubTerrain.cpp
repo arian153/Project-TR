@@ -1,5 +1,6 @@
 #include "SubTerrain.hpp"
 
+#include "HitData.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
 #include "../../../Math/Utility/Utility.hpp"
 #include "../../../Math/Utility/Utility.inl"
@@ -55,6 +56,13 @@ namespace GAM400
         return false;
     }
 
+    Vector3 TerrainFace::Normal() const
+    {
+        Vector3 edge_ab = vertex_b - vertex_a;
+        Vector3 edge_ac = vertex_c - vertex_a;
+        return CrossProduct(edge_ab, edge_ac).Normalize();
+    }
+
     SubTerrain::SubTerrain()
     {
     }
@@ -81,24 +89,57 @@ namespace GAM400
         }
     }
 
-    bool SubTerrain::HasIntersection(const Ray& ray, Real& t) const
+    void SubTerrain::CastRay(HitData& result, Real max_distance)
+    {
+        result.sub_terrain = this;
+
+        Real   minimum_t = -1.0f;
+        size_t idx       = -1;
+        if (HasIntersection(result.ray, minimum_t, idx) == true)
+        {
+            result.t   = minimum_t;
+            result.hit = true;
+            //ray cast done
+            result.intersection = result.ray.position + result.ray.direction * result.t;
+            result.normal       = GetNormal(idx);
+            if (result.t > max_distance && max_distance >= 0.0f)
+            {
+                result.hit = false;
+            }
+        }
+    }
+
+    bool SubTerrain::HasIntersection(const Ray& ray, Real& t, size_t& idx) const
     {
         t        = Math::REAL_POSITIVE_MAX;
         bool hit = false;
 
-        for (auto& face : faces)
+        idx         = -1;
+        size_t size = faces.size();
+
+        for (size_t i = 0; i < size; ++i)
         {
             Real new_t;
-            if (face.HasIntersection(ray, new_t))
+            if (faces[i].HasIntersection(ray, new_t))
             {
                 hit = true;
                 if (new_t < t)
                 {
-                    t = new_t;
+                    t   = new_t;
+                    idx = i;
                 }
             }
         }
 
         return hit;
+    }
+
+    Vector3 SubTerrain::GetNormal(size_t idx)
+    {
+        if (faces.size() > idx)
+        {
+            return faces[idx].Normal();
+        }
+        return Vector3();
     }
 }

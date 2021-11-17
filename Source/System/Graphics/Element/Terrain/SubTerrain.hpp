@@ -7,6 +7,7 @@
 
 namespace GAM400
 {
+    class HitData;
     class MeshData;
     class Ray;
 
@@ -19,6 +20,8 @@ namespace GAM400
         TerrainFace(U32 a, U32 b, U32 c, const MeshData& terrain_data);
         void Update(const MeshData& terrain_data);
         bool HasIntersection(const Ray& ray, Real& t) const;
+
+        Vector3 Normal() const;
 
     public:
         Vector3 vertex_a, vertex_b, vertex_c;
@@ -33,7 +36,10 @@ namespace GAM400
 
         void AddFace(U32 a, U32 b, U32 c, const MeshData& terrain_data);
         void Update(const MeshData& terrain_data);
-        bool HasIntersection(const Ray& ray, Real& t) const;
+        void CastRay(HitData& result, Real max_distance = -1.0f);
+        bool HasIntersection(const Ray& ray, Real& t, size_t& idx) const;
+
+        Vector3 GetNormal(size_t idx);
 
     public:
         Real min_y = 0.0f;

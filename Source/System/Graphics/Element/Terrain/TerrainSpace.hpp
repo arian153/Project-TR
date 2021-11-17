@@ -10,6 +10,7 @@ namespace GAM400
     class PrimitiveRenderer;
     class Ray;
     class SpaceNode;
+    class HitData;
 
     class TerrainAABB
     {
@@ -64,15 +65,15 @@ namespace GAM400
         TerrainSpace();
         ~TerrainSpace();
 
-        void Initialize();
-        void Update(Real dt);
+        void Initialize(Terrain* terrain);
+        void Update();
         void Shutdown();
         void Render(PrimitiveRenderer* primitive_renderer);
 
         SubTerrain* Pick(const Vector3& point) const;
 
         void Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const;
-        //void CastRay(RayCastResult& result, Real max_distance = -1.0f) const;
+        void CastRay(HitData& result, Real max_distance = -1.0f) const;
 
     private:
         void BuildTreeRecursive(SpaceNode* node, int height);

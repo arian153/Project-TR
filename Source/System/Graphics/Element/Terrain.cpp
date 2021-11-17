@@ -28,6 +28,7 @@ namespace GAM400
     void Terrain::Update(Real dt)
     {
         m_component->Update(dt);
+        //m_space.Update(dt);
     }
 
     void Terrain::Shutdown()
@@ -36,6 +37,7 @@ namespace GAM400
         {
             m_component->m_terrain = nullptr;
         }
+        m_space.Shutdown();
         ReleaseBuffer();
     }
 
@@ -126,6 +128,7 @@ namespace GAM400
     void Terrain::BuildBuffer()
     {
         size_t size = m_grid.vertices.size();
+        m_space.Update();
         if (m_terrain_vertex_size == size)
         {
             //update vertex buffer
@@ -180,7 +183,11 @@ namespace GAM400
         mesh_generator.CreateGrid(m_terrain_width, m_terrain_depth, (U32)m_depth_div, (U32)m_width_div, m_grid);
 
         if (m_terrain_vertex_size != m_grid.vertices.size())
+        {
             CalculateGridIndices();
+            m_space.Initialize(this);
+        }
+           
     }
 
     void Terrain::GeneratePerlinNoise()
@@ -314,7 +321,6 @@ namespace GAM400
             data.diff_type = m_material.diffuse_type;
             data.spec_type = m_material.specular_type;
             data.norm_type = m_material.normal_type;
-            //E5_TODO : need to update user gamma setting
             data.gamma = 2.2f;
 
             m_texture_buffer->Update(data);
