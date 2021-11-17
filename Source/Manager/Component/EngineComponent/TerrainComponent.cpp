@@ -6,6 +6,7 @@
 #include "../../../System/Graphics/Element/Scene.hpp"
 #include "../../../System/Graphics/Element/Terrain.hpp"
 #include "../../../System/Graphics/Utility/PrimitiveRenderer.hpp"
+#include "../../../System/Logic/LogicSubsystem.hpp"
 #include "../../Object/Object.hpp"
 #include "../../Resource/ResourceManager.hpp"
 #include "../../Resource/ResourceType/JsonResource.hpp"
@@ -26,14 +27,17 @@ namespace GAM400
             m_terrain = new Terrain();
             Subscribe();
             m_terrain->Initialize();
-            m_terrain->ClearGrid();
-            m_terrain->GenerateTrigonometric();
-            m_terrain->BuildBuffer();
             m_terrain->SetNoiseSeed(m_noise_seed);
+            m_terrain->ClearGrid();
+            m_terrain->GeneratePerlinNoise();
+            m_terrain->CalculateNTB();
+            m_terrain->BuildBuffer();
+
+            m_terrain->m_input     = m_space->GetLogicSubsystem()->GetInput();
             m_terrain->m_component = this;
         }
 
-        m_drawing_sphere.radius = 5.0f;
+        m_drawing_sphere.radius = 0.1f;
     }
 
     void TerrainComponent::Update(Real dt)
@@ -45,6 +49,24 @@ namespace GAM400
         }
 
         m_terrain->SetWorldMatrix(world);
+
+        if (m_terrain->m_edit_hit_data.hit)
+        {
+            auto primitive_renderer = m_space->GetScene()->GetPrimitiveRenderer();
+
+            Vector3 closest = m_terrain->m_grid.vertices[m_terrain->m_edit_hit_data.closest_idx].GetPosition();
+
+            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), m_picking_point, eRenderingMode::Face, Color(0, 0, 0, 1));
+            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), closest, eRenderingMode::Face, Color(0, 1, 0, 1));
+
+            Vector3 face_a = m_terrain->m_grid.vertices[m_face_a].GetPosition();
+            Vector3 face_b = m_terrain->m_grid.vertices[m_face_b].GetPosition();
+            Vector3 face_c = m_terrain->m_grid.vertices[m_face_c].GetPosition();
+
+            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_a, eRenderingMode::Face, Color(1, 0, 0, 1));
+            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_b, eRenderingMode::Face, Color(1, 0, 0, 1));
+            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_c, eRenderingMode::Face, Color(1, 0, 0, 1));
+        }
     }
 
     void TerrainComponent::Shutdown()
@@ -275,20 +297,6 @@ namespace GAM400
     {
         if (ImGui::CollapsingHeader(m_type.c_str()))
         {
-            {
-                auto primitive_renderer = m_space->GetScene()->GetPrimitiveRenderer();
-
-                Sphere sphere;
-                sphere.radius = 0.5f;
-                sphere.position = m_picking_point;
-                primitive_renderer->DrawPrimitive(sphere, eRenderingMode::Face, Color(1, 0, 0, 1));
-                sphere.position = m_closest_point;
-                primitive_renderer->DrawPrimitive(sphere, eRenderingMode::Face, Color(1, 0, 0, 1));
-
-                //primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), m_picking_point, eRenderingMode::Face, Color(1, 0, 0, 1));
-                //primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), m_closest_point, eRenderingMode::Face, Color(1, 0, 0, 1));
-            }
-
             ImGui::Text("Material");
             ImGui::Text("Material - Ambient");
             ImGui::ColorEdit4("##Material - Ambient", &m_terrain->m_mat_color.ambient.r);
@@ -323,24 +331,6 @@ namespace GAM400
 
             if (ImGui::Button("Build Terrain"))
             {
-                m_terrain->BuildBuffer();
-            }
-
-            if (ImGui::SliderInt("##W_IDX", &m_w_idx, 0, m_terrain->m_width_div - 1))
-            {
-            }
-            if (ImGui::SliderInt("##D_IDX", &m_d_idx, 0, m_terrain->m_depth_div - 1))
-            {
-            }
-
-            size_t  vertex_idx = (size_t)m_d_idx * (size_t)m_terrain->m_width_div + (size_t)m_w_idx;
-            Vector3 pos        = m_terrain->m_grid.vertices[vertex_idx].GetPosition();
-            Real    height     = pos.y;
-            if (ImGui::InputFloat("##Height IDX", &height))
-            {
-                pos.y = height;
-                m_terrain->m_grid.vertices[vertex_idx].SetPosition(pos);
-                m_terrain->CalculateNTB();
                 m_terrain->BuildBuffer();
             }
 

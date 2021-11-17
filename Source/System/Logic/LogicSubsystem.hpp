@@ -33,6 +33,8 @@ namespace GAM400
         void SetMouseOrtho(const Vector2& pos);
 
         void GetLogicComponents(const std::string& type, std::vector<LogicComponent*>& container);
+
+        InputCommon* GetInput() const;
     private:
         friend class LogicSystem;
     private:

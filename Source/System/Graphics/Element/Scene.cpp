@@ -35,6 +35,7 @@ namespace GAM400
         //primitive renderer
         m_primitive_renderer = new PrimitiveRenderer(m_renderer);
         m_primitive_renderer->Initialize(m_shader_manager->GetShader("Color"));
+        m_color_ins_shader = m_shader_manager->GetShader("ColorInstancing");
         UpdateView();
         UpdateProjection();
 
@@ -115,6 +116,7 @@ namespace GAM400
             return;
 
         m_primitive_renderer->Render(m_matrix_buffer);
+        m_primitive_renderer->RenderInstancing(m_color_ins_shader, m_matrix_instancing_buffer);
         m_primitive_renderer->Clear();
 
         {

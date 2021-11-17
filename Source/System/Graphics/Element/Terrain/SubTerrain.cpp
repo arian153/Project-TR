@@ -72,6 +72,24 @@ namespace GAM400
         return da < db ? (da < dc ? idx_a : idx_c) : (db < dc ? idx_b : idx_c);
     }
 
+    void TerrainFace::SetVertex(U32 idx, const Vector3& vertex)
+    {
+        if (idx == idx_a)
+        {
+            vertex_a = vertex;
+            return;
+        }
+
+        if (idx == idx_b)
+        {
+            vertex_b = vertex;
+            return;
+        }
+
+        if (idx == idx_c)
+            vertex_c = vertex;
+    }
+
     SubTerrain::SubTerrain()
     {
     }
@@ -103,7 +121,7 @@ namespace GAM400
         result.sub_terrain = this;
 
         Real   minimum_t = -1.0f;
-        size_t idx       = -1;
+        size_t idx;
         if (HasIntersection(result.ray, minimum_t, idx) == true)
         {
             result.t   = minimum_t;
@@ -112,6 +130,7 @@ namespace GAM400
             result.intersection = result.ray.position + result.ray.direction * result.t;
             result.normal       = GetNormal(idx);
             result.closest_idx  = GetVertexIDX(idx, result.intersection);
+            result.face_idx     = idx;
             if (result.t > max_distance && max_distance >= 0.0f)
             {
                 result.hit = false;
@@ -124,8 +143,8 @@ namespace GAM400
         t        = Math::REAL_POSITIVE_MAX;
         bool hit = false;
 
-        idx         = -1;
         size_t size = faces.size();
+        idx         = size;
 
         for (size_t i = 0; i < size; ++i)
         {

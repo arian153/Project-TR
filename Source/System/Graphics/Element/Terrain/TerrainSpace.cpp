@@ -427,6 +427,27 @@ namespace GAM400
         }
     }
 
+    void TerrainSpace::UpdateAABBNode(SpaceNode* leaf_node) const
+    {
+        std::list<SpaceNode*> aabb_queue;
+        aabb_queue.push_back(leaf_node);
+        while (!aabb_queue.empty())
+        {
+            SpaceNode& node = *aabb_queue.front();
+            aabb_queue.pop_front();
+            if (node.parent != nullptr)
+            {
+                node.parent->aabb.ExpandY(node.aabb.Min().y, node.aabb.Max().y);
+
+                auto found = std::find(aabb_queue.begin(), aabb_queue.end(), node.parent);
+                if (found == aabb_queue.end())
+                {
+                    aabb_queue.push_back(node.parent);
+                }
+            }
+        }
+    }
+
     void TerrainSpace::Shutdown()
     {
         for (auto& node : m_nodes)
@@ -473,6 +494,7 @@ namespace GAM400
                 {
                     SubTerrain& sub_terrain = node.sub_terrain;
                     HitData     ray_cast_result(ray);
+                    ray_cast_result.node = &node;
                     sub_terrain.CastRay(ray_cast_result, max_distance);
                     if (ray_cast_result.hit == true)
                     {

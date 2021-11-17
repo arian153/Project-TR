@@ -5,10 +5,12 @@
 #include "../Common/Texture/TextureArrayCommon.hpp"
 #include "../DataType/MaterialData.hpp"
 #include "../DataType/MeshData.hpp"
+#include "Terrain/HitData.hpp"
 #include "Terrain/TerrainSpace.hpp"
 
 namespace GAM400
 {
+    class InputCommon;
     class Matrix44;
     struct MaterialIdentifier;
     class ConstantBufferCommon;
@@ -29,12 +31,12 @@ namespace GAM400
         void Bind() const;
         void Draw() const;
 
-        void IsMousePressed(const Ray& ray) const;
+        void IsMousePressed(const Ray& ray);
         void IsMouseDown(const Ray& ray);
 
         void CreateBuffer();
         void ReleaseBuffer();
-        void BuildBuffer();
+        void BuildBuffer(bool update_space = true);
 
         void    GenerateTrigonometric();
         Real    GenerateTrigonometricHeight(Real x, Real z) const;
@@ -62,6 +64,7 @@ namespace GAM400
         void CalculateNTB();
         void CalculateGridIndices();
         void SetNoiseSeed(U32 seed);
+        void CalculateNTB(U32 idx);
 
     private:
         friend class TerrainComponent;
@@ -70,8 +73,8 @@ namespace GAM400
     private:
         Real   m_terrain_width       = 400.0f;
         Real   m_terrain_depth       = 400.0f;
-        I32    m_width_div           = 200;
-        I32    m_depth_div           = 200;
+        I32    m_width_div           = 400;
+        I32    m_depth_div           = 400;
         size_t m_terrain_vertex_size = 0;
         int    m_smooth_level        = 2;
 
@@ -90,12 +93,15 @@ namespace GAM400
         TerrainSpace                    m_terrain_space;
         std::vector<GeometryPointIndex> m_point_indices;
 
-       
+        HitData m_edit_hit_data;
+        int     m_hit_mouse_y = 0;
+        Vector3 m_hit_vertex;
 
         TextureArrayCommon  m_textures;
         MaterialIdentifier  m_material;
         MaterialColor       m_mat_color;
         RendererCommon*     m_renderer      = nullptr;
+        InputCommon*        m_input         = nullptr;
         VertexBufferCommon* m_vertex_buffer = nullptr;
         IndexBufferCommon*  m_index_buffer  = nullptr;
         TerrainComponent*   m_component     = nullptr;

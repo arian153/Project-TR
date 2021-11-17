@@ -73,6 +73,7 @@ namespace GAM400
 
         void Initialize(Terrain* terrain);
         void Update();
+        void UpdateAABBNode(SpaceNode* leaf_node) const;
         void Shutdown();
         void Render(PrimitiveRenderer* primitive_renderer);
 

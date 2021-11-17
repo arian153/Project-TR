@@ -44,11 +44,11 @@ namespace GAM400
         MaterialColor      m_material_color;
 
         std::vector<TextResource*> m_height_maps;
-        std::vector<std::string> m_height_map_names;
-        int m_height_map_idx;
+        std::vector<std::string>   m_height_map_names;
+        int                        m_height_map_idx;
 
-        U32 m_noise_seed = 142356;
-        int m_terrain_mode = 1;
+        U32 m_noise_seed   = 142356;
+        int m_terrain_mode = 2;
 
         int m_w_idx = 0;
         int m_d_idx = 0;
@@ -56,5 +56,9 @@ namespace GAM400
         Vector3 m_picking_point;
         Vector3 m_closest_point;
         Sphere  m_drawing_sphere;
+
+        U32 m_face_a = 0;
+        U32 m_face_b = 0;
+        U32 m_face_c = 0;
     };
 }

@@ -88,4 +88,9 @@ namespace GAM400
             }
         }
     }
+
+    InputCommon* LogicSubsystem::GetInput() const
+    {
+        return m_input;
+    }
 }

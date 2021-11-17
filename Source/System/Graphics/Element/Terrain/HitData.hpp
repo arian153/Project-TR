@@ -5,6 +5,7 @@
 
 namespace GAM400
 {
+    class SpaceNode;
     class SubTerrain;
 
     class HitData
@@ -22,5 +23,7 @@ namespace GAM400
         Vector3     intersection;
         Vector3     normal;
         U32         closest_idx = 0;
+        size_t      face_idx    = 0;
+        SpaceNode*  node        = nullptr;
     };
 }

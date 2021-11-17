@@ -24,6 +24,7 @@ namespace GAM400
         Vector3 Normal() const;
         U32 ClosestIDX(const Vector3& point) const;
 
+        void SetVertex(U32 idx, const Vector3& vertex);
     public:
         Vector3 vertex_a, vertex_b, vertex_c;
         U32     idx_a,    idx_b,    idx_c;
