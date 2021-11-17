@@ -38,6 +38,9 @@ namespace GAM400
         void ReleaseBuffer();
         void BuildBuffer(bool update_space = true);
 
+        void ExportPPM();
+        void ExportOBJ();
+
         void    GenerateTrigonometric();
         Real    GenerateTrigonometricHeight(Real x, Real z) const;
         Vector3 GenerateTrigonometricNormal(Real x, Real z) const;
@@ -73,8 +76,8 @@ namespace GAM400
     private:
         Real   m_terrain_width       = 400.0f;
         Real   m_terrain_depth       = 400.0f;
-        I32    m_width_div           = 400;
-        I32    m_depth_div           = 400;
+        I32    m_width_div           = 100;
+        I32    m_depth_div           = 100;
         size_t m_terrain_vertex_size = 0;
         int    m_smooth_level        = 2;
 

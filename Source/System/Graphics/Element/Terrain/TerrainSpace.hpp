@@ -82,6 +82,10 @@ namespace GAM400
         void Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const;
         void CastRay(HitData& result, Real max_distance = -1.0f) const;
 
+        Real RootMinY() const;
+        Real RootMaxY() const;
+        Real RootScaleY() const;
+
     private:
         void BuildTreeRecursive(SpaceNode* node, int height);
 

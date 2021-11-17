@@ -334,6 +334,18 @@ namespace GAM400
                 m_terrain->BuildBuffer();
             }
 
+            if (ImGui::Button("Export Wavefront OBJ"))
+            {
+                m_terrain->ExportOBJ();
+            }
+
+            if (ImGui::Button("Export Height Map"))
+            {
+                m_terrain->ExportPPM();
+            }
+
+
+
             ImGui::Text("Terrain Generation Method");
             const char* terrain_gen[] = {"Height-Map", "Trigonometric", "Perlin-Noise"};
 

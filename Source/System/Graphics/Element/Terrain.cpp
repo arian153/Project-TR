@@ -1,6 +1,9 @@
 #include "Terrain.hpp"
 
+#include <fstream>
+
 #include "../../../Manager/Component/EngineComponent/TerrainComponent.hpp"
+#include "../../../Manager/Resource/ResourceType/TextResource.hpp"
 #include "../../Core/Input/InputCommon.hpp"
 #include "../../Core/Input/KeyboardInput.hpp"
 #include "../../Core/Input/MouseInput.hpp"
@@ -116,7 +119,6 @@ namespace GAM400
             {
                 if (keyboard->IsDown(eKeyCodeKeyboard::Shift_Left))
                 {
-
                 }
                 else
                 {
@@ -230,6 +232,73 @@ namespace GAM400
             m_vertex_buffer->Init(m_renderer, m_grid.vertices, true);
             m_terrain_vertex_size = size;
         }
+    }
+
+    void Terrain::ExportPPM()
+    {
+        PixelData data;
+        data.w = (U32)m_width_div;
+        data.h = (U32)m_depth_div;
+
+        size_t size    = (size_t)data.w * data.h;
+        data.pixels    = new PixelData::PixelRGB[size];
+        Real inv_scale = m_terrain_space.RootScaleY();
+        inv_scale      = Math::IsZero(inv_scale) ? 0.0f : 1.0f / inv_scale;
+        Real min       = m_terrain_space.RootMinY();
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            Vector3 p        = m_grid.vertices[i].GetPosition();
+            Real    scale    = (p.y - min) * inv_scale;
+            data.pixels[i].r = scale;
+            data.pixels[i].g = scale;
+            data.pixels[i].b = scale;
+        }
+
+        TextResource::SavePPM(&data, "TerrainHeightMap.ppm");
+    }
+
+    void Terrain::ExportOBJ()
+    {
+        std::ofstream ofs;
+        ofs.open("TerrainMesh.obj", std::ios_base::out);
+
+        size_t vertex_count = m_grid.vertices.size();
+
+        for (size_t i = 0; i < vertex_count; ++i)
+        {
+            Vector3 v = m_grid.vertices[i].GetPosition();
+            ofs << "v " << v.x << " " << v.y << " " << -1.0f * v.z << std::endl;
+        }
+
+        for (size_t i = 0; i < vertex_count; ++i)
+        {
+            Vector2 vt = m_grid.vertices[i].GetUV();
+            ofs << "vt " << vt.x << " " << 1.0f - vt.y << std::endl;
+        }
+
+        for (size_t i = 0; i < vertex_count; ++i)
+        {
+            Vector3 vn = m_grid.vertices[i].GetNormal();
+            ofs << "vn " << vn.x << " " << vn.y << " " << -1.0f * vn.z << std::endl;
+        }
+
+        size_t face_count = m_grid.faces.size();
+
+        for (size_t i = 0; i < face_count; ++i)
+        {
+            ofs << "f ";
+
+            U32 fa = m_grid.faces[i].a + 1;
+            U32 fb = m_grid.faces[i].b + 1;
+            U32 fc = m_grid.faces[i].c + 1;
+
+            ofs << fc << "/" << fc << "/" << fc << " ";
+            ofs << fb << "/" << fb << "/" << fb << " ";
+            ofs << fa << "/" << fa << "/" << fa << std::endl;
+        }
+
+        ofs.close();
     }
 
     void Terrain::GenerateTrigonometric()

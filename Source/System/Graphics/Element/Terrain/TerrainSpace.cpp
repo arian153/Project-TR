@@ -522,6 +522,21 @@ namespace GAM400
         }
     }
 
+    Real TerrainSpace::RootMinY() const
+    {
+        return m_root->aabb.Min().y;
+    }
+
+    Real TerrainSpace::RootMaxY() const
+    {
+        return m_root->aabb.Max().y;
+    }
+
+    Real TerrainSpace::RootScaleY() const
+    {
+        return  m_root->aabb.Max().y - m_root->aabb.Min().y;
+    }
+
     void TerrainSpace::BuildTreeRecursive(SpaceNode* node, int height)
     {
         if (height == m_tree_height)
