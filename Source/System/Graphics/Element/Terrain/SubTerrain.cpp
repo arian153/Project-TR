@@ -63,6 +63,15 @@ namespace GAM400
         return CrossProduct(edge_ab, edge_ac).Normalize();
     }
 
+    U32 TerrainFace::ClosestIDX(const Vector3& point) const
+    {
+        Real da = point.DistanceSquaredTo(vertex_a);
+        Real db = point.DistanceSquaredTo(vertex_b);
+        Real dc = point.DistanceSquaredTo(vertex_c);
+
+        return da < db ? (da < dc ? idx_a : idx_c) : (db < dc ? idx_b : idx_c);
+    }
+
     SubTerrain::SubTerrain()
     {
     }
@@ -102,6 +111,7 @@ namespace GAM400
             //ray cast done
             result.intersection = result.ray.position + result.ray.direction * result.t;
             result.normal       = GetNormal(idx);
+            result.closest_idx  = GetVertexIDX(idx, result.intersection);
             if (result.t > max_distance && max_distance >= 0.0f)
             {
                 result.hit = false;
@@ -141,5 +151,14 @@ namespace GAM400
             return faces[idx].Normal();
         }
         return Vector3();
+    }
+
+    U32 SubTerrain::GetVertexIDX(size_t face_idx, const Vector3& point)
+    {
+        if (faces.size() > face_idx)
+        {
+            return faces[face_idx].ClosestIDX(point);
+        }
+        return 0;
     }
 }

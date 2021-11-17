@@ -9,6 +9,7 @@
 #include "../Common/Buffer2/VertexBufferCommon.hpp"
 #include "../DataType/MeshData.hpp"
 #include "../Utility/MeshGenerator.hpp"
+#include "Terrain/HitData.hpp"
 
 namespace GAM400
 {
@@ -37,7 +38,7 @@ namespace GAM400
         {
             m_component->m_terrain = nullptr;
         }
-        m_space.Shutdown();
+        m_terrain_space.Shutdown();
         ReleaseBuffer();
     }
 
@@ -54,6 +55,25 @@ namespace GAM400
     void Terrain::Draw() const
     {
         m_index_buffer->Draw();
+    }
+
+    void Terrain::IsMousePressed(const Ray& ray) const
+    {
+        HitData hit_data(ray);
+        m_terrain_space.CastRay(hit_data);
+
+        if (hit_data.hit)
+        {
+            m_component->m_w_idx = hit_data.closest_idx % m_width_div;
+            m_component->m_d_idx = hit_data.closest_idx / m_width_div;
+
+            m_component->m_picking_point = hit_data.intersection;
+            m_component->m_closest_point = m_grid.vertices[hit_data.closest_idx].GetPosition();
+        }
+    }
+
+    void Terrain::IsMouseDown(const Ray& ray)
+    {
     }
 
     void Terrain::CreateBuffer()
@@ -128,7 +148,7 @@ namespace GAM400
     void Terrain::BuildBuffer()
     {
         size_t size = m_grid.vertices.size();
-        m_space.Update();
+        m_terrain_space.Update();
         if (m_terrain_vertex_size == size)
         {
             //update vertex buffer
@@ -185,9 +205,8 @@ namespace GAM400
         if (m_terrain_vertex_size != m_grid.vertices.size())
         {
             CalculateGridIndices();
-            m_space.Initialize(this);
+            m_terrain_space.Initialize(this);
         }
-           
     }
 
     void Terrain::GeneratePerlinNoise()
@@ -321,7 +340,7 @@ namespace GAM400
             data.diff_type = m_material.diffuse_type;
             data.spec_type = m_material.specular_type;
             data.norm_type = m_material.normal_type;
-            data.gamma = 2.2f;
+            data.gamma     = 2.2f;
 
             m_texture_buffer->Update(data);
         }

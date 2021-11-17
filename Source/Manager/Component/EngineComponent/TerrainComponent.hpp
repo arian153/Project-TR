@@ -4,6 +4,7 @@
 
 #include "..//Component.hpp"
 #include "../../../System/Graphics/DataType/MaterialData.hpp"
+#include "../../../System/Math/Primitive/ConvexHull3D/Sphere.hpp"
 #include "../../../System/Math/Utility/VectorDef.hpp"
 
 namespace GAM400
@@ -51,5 +52,9 @@ namespace GAM400
 
         int m_w_idx = 0;
         int m_d_idx = 0;
+
+        Vector3 m_picking_point;
+        Vector3 m_closest_point;
+        Sphere  m_drawing_sphere;
     };
 }

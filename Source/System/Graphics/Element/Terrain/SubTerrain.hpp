@@ -22,6 +22,7 @@ namespace GAM400
         bool HasIntersection(const Ray& ray, Real& t) const;
 
         Vector3 Normal() const;
+        U32 ClosestIDX(const Vector3& point) const;
 
     public:
         Vector3 vertex_a, vertex_b, vertex_c;
@@ -40,6 +41,7 @@ namespace GAM400
         bool HasIntersection(const Ray& ray, Real& t, size_t& idx) const;
 
         Vector3 GetNormal(size_t idx);
+        U32 GetVertexIDX(size_t face_idx, const Vector3& point);
 
     public:
         Real min_y = 0.0f;

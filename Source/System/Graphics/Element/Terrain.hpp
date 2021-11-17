@@ -1,5 +1,6 @@
 #pragma once
 #include "../../Math/Algebra/Matrix44.hpp"
+#include "../../Math/Primitive/ConvexHull3D/Sphere.hpp"
 #include "../../Math/Utility/NoiseUtility.hpp"
 #include "../Common/Texture/TextureArrayCommon.hpp"
 #include "../DataType/MaterialData.hpp"
@@ -27,6 +28,9 @@ namespace GAM400
         void Shutdown();
         void Bind() const;
         void Draw() const;
+
+        void IsMousePressed(const Ray& ray) const;
+        void IsMouseDown(const Ray& ray);
 
         void CreateBuffer();
         void ReleaseBuffer();
@@ -66,8 +70,8 @@ namespace GAM400
     private:
         Real   m_terrain_width       = 400.0f;
         Real   m_terrain_depth       = 400.0f;
-        I32    m_width_div           = 400;
-        I32    m_depth_div           = 400;
+        I32    m_width_div           = 200;
+        I32    m_depth_div           = 200;
         size_t m_terrain_vertex_size = 0;
         int    m_smooth_level        = 2;
 
@@ -83,8 +87,10 @@ namespace GAM400
 
         PerlinNoise                     m_noise_utility;
         MeshData                        m_grid;
-        TerrainSpace                    m_space;
+        TerrainSpace                    m_terrain_space;
         std::vector<GeometryPointIndex> m_point_indices;
+
+       
 
         TextureArrayCommon  m_textures;
         MaterialIdentifier  m_material;

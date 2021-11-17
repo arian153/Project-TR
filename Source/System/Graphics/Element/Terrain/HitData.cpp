@@ -22,6 +22,7 @@ namespace GAM400
             t            = rhs.t;
             intersection = rhs.intersection;
             normal       = rhs.normal;
+            closest_idx  = rhs.closest_idx;
         }
         return *this;
     }

@@ -2,7 +2,6 @@
 
 #include <queue>
 
-
 #include "HitData.hpp"
 #include "../Terrain.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
@@ -11,6 +10,11 @@
 namespace GAM400
 {
     TerrainAABB::TerrainAABB()
+    {
+    }
+
+    TerrainAABB::TerrainAABB(SpaceNode* node)
+        : m_node(node)
     {
     }
 
@@ -229,6 +233,24 @@ namespace GAM400
         return true;
     }
 
+    void TerrainAABB::ResetMinMaxY()
+    {
+        m_min.y = Math::REAL_POSITIVE_MAX;
+        m_max.y = Math::REAL_NEGATIVE_MAX;
+    }
+
+    void TerrainAABB::SetMinMaxY(Real min, Real max)
+    {
+        m_min.y = min;
+        m_max.y = max;
+    }
+
+    void TerrainAABB::ExpandY(Real min, Real max)
+    {
+        m_min.y = Math::Min(m_min.y, min);
+        m_max.y = Math::Max(m_max.y, max);
+    }
+
     Real TerrainAABB::Volume() const
     {
         return (m_max.x - m_min.x) * (m_max.y - m_min.y) * (m_max.z - m_min.z);
@@ -297,6 +319,7 @@ namespace GAM400
     }
 
     SpaceNode::SpaceNode()
+        : aabb(this)
     {
         children[0] = nullptr;
         children[1] = nullptr;
@@ -315,8 +338,6 @@ namespace GAM400
         //to determine whether it is leaf or not
         return children[0] == nullptr;
     }
-
-  
 
     TerrainSpace::TerrainSpace()
     {
@@ -376,9 +397,33 @@ namespace GAM400
 
     void TerrainSpace::Update()
     {
+        std::list<SpaceNode*> aabb_queue;
+        for (auto& node : m_nodes)
+        {
+            node->aabb.ResetMinMaxY();
+        }
+
         for (auto& leaf : m_leaves)
         {
             leaf->sub_terrain.Update(m_terrain->m_grid);
+            leaf->aabb.SetMinMaxY(leaf->sub_terrain.min_y, leaf->sub_terrain.max_y);
+            aabb_queue.push_back(leaf);
+        }
+
+        while (!aabb_queue.empty())
+        {
+            SpaceNode& node = *aabb_queue.front();
+            aabb_queue.pop_front();
+            if (node.parent != nullptr)
+            {
+                node.parent->aabb.ExpandY(node.aabb.Min().y, node.aabb.Max().y);
+
+                auto found = std::find(aabb_queue.begin(), aabb_queue.end(), node.parent);
+                if (found == aabb_queue.end())
+                {
+                    aabb_queue.push_back(node.parent);
+                }
+            }
         }
     }
 

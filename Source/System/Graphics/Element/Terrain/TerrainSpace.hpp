@@ -16,6 +16,7 @@ namespace GAM400
     {
     public:
         TerrainAABB();
+        explicit TerrainAABB(SpaceNode* node);
         ~TerrainAABB();
         void SetMinMax(const Vector3& min, const Vector3& max);
         void SetCenterHalfSize(const Vector3& center, const Vector3& half_size);
@@ -30,6 +31,10 @@ namespace GAM400
         bool Contains(const TerrainAABB& aabb) const;
         bool TestRayIntersection(const Ray& ray, Real& t, Real max_distance = -1.0f) const;
 
+        void ResetMinMaxY();
+        void SetMinMaxY(Real min, Real max);
+        void ExpandY(Real min, Real max);
+
         Real    Volume() const;
         Vector3 Center() const;
         Vector3 Size() const;
@@ -38,6 +43,7 @@ namespace GAM400
         Vector3 Max() const;
 
         TerrainAABB Union(const TerrainAABB& aabb) const;
+    
 
         SpaceNode* GetSpaceNode() const;
     private:

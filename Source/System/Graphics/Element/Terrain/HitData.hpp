@@ -1,4 +1,5 @@
 #pragma once
+#include "../../../Core/Utility/CoreDef.hpp"
 #include "../../../Math/Algebra/Vector3.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
 
@@ -20,5 +21,6 @@ namespace GAM400
         Real        t           = -1.0f;
         Vector3     intersection;
         Vector3     normal;
+        U32         closest_idx = 0;
     };
 }

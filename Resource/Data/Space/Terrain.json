@@ -42,7 +42,7 @@
           "Type": "class GAM400::TransformComponent",
           "Value": {
             "Orientation": [1, 0, 0, 0],
-            "Position": [0, -10, 0],
+            "Position": [0, 0, 0],
             "Scale": [1, 1, 1]
           }
         },

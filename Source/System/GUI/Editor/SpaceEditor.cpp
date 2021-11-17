@@ -409,6 +409,18 @@ namespace GAM400
                 space->GetLogicSubsystem()->SetMouseOrtho(m_ortho_pos);
             }
 
+            if (space->GetScene() != nullptr)
+            {
+                if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && is_space_hovered)
+                {
+                    space->GetScene()->IsPickingPressed(m_picking_ray);
+                }
+                else if (ImGui::IsMouseDown(ImGuiMouseButton_Right) && is_space_hovered)
+                {
+                    space->GetScene()->IsPickingDown(m_picking_ray);
+                }
+            }
+
             //if (space->GetWorld() != nullptr)
             //{
             //    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && is_space_hovered)
