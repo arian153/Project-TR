@@ -469,6 +469,14 @@ namespace GAM400
 
     void TerrainSpace::Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const
     {
+        //contain case
+        //add full sub-terrain
+
+
+        //intersection case
+        //get faces from sub-terrain.
+
+
     }
 
     void TerrainSpace::CastRay(HitData& result, Real max_distance) const

@@ -3,6 +3,7 @@
 #include "TransformComponent.hpp"
 #include "../../../External/JSONCPP/json/json.h"
 #include "../../../System/Core/Utility/CoreUtility.hpp"
+#include "../../../System/Graphics/Common/Texture/TextureCommon.hpp"
 #include "../../../System/Graphics/Element/Scene.hpp"
 #include "../../../System/Graphics/Element/Terrain.hpp"
 #include "../../../System/Graphics/Utility/PrimitiveRenderer.hpp"
@@ -344,7 +345,21 @@ namespace GAM400
                 m_terrain->ExportPPM();
             }
 
-
+            if (m_terrain->m_height_map_texture_created)
+            {
+                ImVec2 uv_min      = ImVec2(0.0f, 0.0f);                   // Top-left
+                ImVec2 uv_max      = ImVec2(1.0f, 1.0f);                   // Lower-right
+                ImVec4 tint_col    = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // No tint
+                ImVec4 border_col  = ImVec4(1.0f, 1.0f, 1.0f, 0.5f); // 50% opaque white
+                ImVec2 min         = ImGui::GetWindowContentRegionMin();
+                ImVec2 max         = ImGui::GetWindowContentRegionMax();
+                Real   scene_scale = max.x - min.x;
+                Real   ratio       = (Real)m_terrain->m_depth_div / (Real)m_terrain->m_width_div;
+                ImVec2 size        = ImVec2(scene_scale, scene_scale * ratio);
+                ImGui::Image(
+                             m_terrain->m_height_map_texture->GetTexture(), size
+                           , uv_min, uv_max, tint_col, border_col);
+            }
 
             ImGui::Text("Terrain Generation Method");
             const char* terrain_gen[] = {"Height-Map", "Trigonometric", "Perlin-Noise"};

@@ -1,6 +1,7 @@
 #include "SubTerrain.hpp"
 
 #include "HitData.hpp"
+#include "TerrainSpace.hpp"
 #include "../../../Math/Primitive/Others/Ray.hpp"
 #include "../../../Math/Utility/Utility.hpp"
 #include "../../../Math/Utility/Utility.inl"
@@ -53,6 +54,20 @@ namespace GAM400
         {
             return true;
         }
+        return false;
+    }
+
+    bool TerrainFace::HasIntersection(const TerrainAABB& aabb) const
+    {
+        if (aabb.Contains(vertex_a))
+            return true;
+
+        if (aabb.Contains(vertex_b))
+            return true;
+
+        if (aabb.Contains(vertex_c))
+            return true;
+
         return false;
     }
 
@@ -179,5 +194,16 @@ namespace GAM400
             return faces[face_idx].ClosestIDX(point);
         }
         return 0;
+    }
+
+    void SubTerrain::Query(const TerrainAABB& aabb, std::vector<TerrainFace*>& output_faces)
+    {
+        for (auto& face : faces)
+        {
+            if (face.HasIntersection(aabb))
+            {
+                output_faces.push_back(&face);
+            }
+        }
     }
 }

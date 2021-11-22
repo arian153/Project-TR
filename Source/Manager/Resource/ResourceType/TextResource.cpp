@@ -40,6 +40,34 @@ namespace GAM400
             delete[] pixels;
     }
 
+    void PixelData::ToRGBA8(std::vector<U32>& rgba) const
+    {
+        if (w == 0 || h == 0)
+        {
+            return;
+        }
+        rgba.clear();
+
+        size_t size = (size_t)w * h;
+        rgba.resize(size);
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            unsigned char r = static_cast<unsigned char>(std::min(1.f, pixels[i].r) * 255);
+            unsigned char g = static_cast<unsigned char>(std::min(1.f, pixels[i].g) * 255);
+            unsigned char b = static_cast<unsigned char>(std::min(1.f, pixels[i].b) * 255);
+            rgba[i] = (U32)(((r & 0xff) << 24) + ((g & 0xff) << 16) + ((b & 0xff) << 8) + (0xff));
+        }
+    }
+
+    U32 PixelData::ToRGBA8(size_t idx) const
+    {
+        unsigned char r = static_cast<unsigned char>(std::min(1.f, pixels[idx].r) * 255);
+        unsigned char g = static_cast<unsigned char>(std::min(1.f, pixels[idx].g) * 255);
+        unsigned char b = static_cast<unsigned char>(std::min(1.f, pixels[idx].b) * 255);
+        return (U32)(((r & 0xff) << 24) + ((g & 0xff) << 16) + ((b & 0xff) << 8) + (0xff));
+    }
+
     TextResource::TextResource(const std::wstring& path)
         : Resource(path)
     {

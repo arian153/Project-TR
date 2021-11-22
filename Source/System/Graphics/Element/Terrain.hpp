@@ -76,8 +76,8 @@ namespace GAM400
     private:
         Real   m_terrain_width       = 400.0f;
         Real   m_terrain_depth       = 400.0f;
-        I32    m_width_div           = 100;
-        I32    m_depth_div           = 100;
+        I32    m_width_div           = 400;
+        I32    m_depth_div           = 400;
         size_t m_terrain_vertex_size = 0;
         int    m_smooth_level        = 2;
 
@@ -108,6 +108,9 @@ namespace GAM400
         VertexBufferCommon* m_vertex_buffer = nullptr;
         IndexBufferCommon*  m_index_buffer  = nullptr;
         TerrainComponent*   m_component     = nullptr;
+
+        TextureCommon* m_height_map_texture         = nullptr;
+        bool           m_height_map_texture_created = false;
 
         ConstantBufferCommon* m_matrix_buffer   = nullptr;
         ConstantBufferCommon* m_texture_buffer  = nullptr;

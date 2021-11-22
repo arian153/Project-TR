@@ -1,4 +1,6 @@
 #pragma once
+#include <vector>
+
 #include "../Resource.hpp"
 #include "../../../System/Core/Utility/CoreDef.hpp"
 #include "../../../System/Math/Utility/MathDef.hpp"
@@ -21,6 +23,9 @@ namespace GAM400
         PixelData();
         PixelData(const U32& width, const U32& height);
         ~PixelData();
+
+        void ToRGBA8(std::vector<U32>& rgba) const;
+        U32 ToRGBA8(size_t idx) const;
 
         U32  w, h;
         PixelRGB* pixels;

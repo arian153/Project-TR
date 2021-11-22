@@ -14,6 +14,7 @@
 #include "../Common/Buffer2/ConstantBufferData.hpp"
 #include "../Common/Buffer2/IndexBufferCommon.hpp"
 #include "../Common/Buffer2/VertexBufferCommon.hpp"
+#include "../Common/Texture/TextureCommon.hpp"
 #include "../DataType/MeshData.hpp"
 #include "../Utility/MeshGenerator.hpp"
 #include "Terrain/HitData.hpp"
@@ -142,6 +143,11 @@ namespace GAM400
 
     void Terrain::CreateBuffer()
     {
+        if (m_height_map_texture == nullptr)
+        {
+            m_height_map_texture = new TextureCommon();
+        }
+
         if (m_index_buffer == nullptr)
         {
             m_index_buffer = new IndexBufferCommon();
@@ -173,6 +179,13 @@ namespace GAM400
 
     void Terrain::ReleaseBuffer()
     {
+        if (m_height_map_texture != nullptr)
+        {
+            m_height_map_texture->Shutdown();
+            delete m_height_map_texture;
+            m_height_map_texture = nullptr;
+        }
+
         if (m_index_buffer != nullptr)
         {
             m_index_buffer->Shutdown();
@@ -254,6 +267,9 @@ namespace GAM400
             data.pixels[i].g = scale;
             data.pixels[i].b = scale;
         }
+
+        m_height_map_texture->Shutdown();
+        m_height_map_texture_created = m_height_map_texture->Initialize(m_renderer, &data);
 
         TextResource::SavePPM(&data, "TerrainHeightMap.ppm");
     }

@@ -2,6 +2,7 @@
 #include "../../Common/Texture/TextureCommon.hpp"
 #include "../../../../External/DirectXTextureLoader/DDSTextureLoader.h"
 #include "../../../../External/DirectXTextureLoader/WICTextureLoader.h"
+#include "../../../../Manager/Resource/ResourceType/TextResource.hpp"
 #include "../../Common/Renderer/RendererCommon.hpp"
 #include "../../Common/Buffer/TextTextureBufferCommon.hpp"
 #include "../../Common/Buffer/RenderTextureBufferCommon.hpp"
@@ -97,6 +98,52 @@ namespace GAM400
         desc.Width                = desc.Height = desc.MipLevels = desc.ArraySize = 1;
         desc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM;
         desc.SampleDesc.Count     = 1;
+        desc.Usage                = D3D11_USAGE_IMMUTABLE;
+        desc.BindFlags            = D3D11_BIND_SHADER_RESOURCE;
+
+        ID3D11Texture2D* tex;
+        auto             device  = renderer->GetDevice();
+        HRESULT          hresult = device->CreateTexture2D(&desc, &initData, &tex);
+
+        if (SUCCEEDED(hresult))
+        {
+            D3D11_SHADER_RESOURCE_VIEW_DESC shader_resource_view_desc = {};
+            shader_resource_view_desc.Format                          = DXGI_FORMAT_R8G8B8A8_UNORM;
+            shader_resource_view_desc.ViewDimension                   = D3D11_SRV_DIMENSION_TEXTURE2D;
+            shader_resource_view_desc.Texture2D.MipLevels             = 1;
+
+            hresult = device->CreateShaderResourceView(tex, &shader_resource_view_desc, &m_texture);
+        }
+
+        if (FAILED(hresult))
+        {
+            return false;
+        }
+
+        if (tex != nullptr)
+        {
+            tex->Release();
+            tex = nullptr;
+        }
+
+        m_device_context = renderer->GetDeviceContext();
+        return true;
+    }
+
+    bool TextureCommon::Initialize(RendererCommon* renderer, PixelData* pixel_data)
+    {
+        std::vector<U32> pixels;
+        pixel_data->ToRGBA8(pixels);
+        D3D11_SUBRESOURCE_DATA initData = {pixels.data(), sizeof(U32) * pixel_data->w, 0};
+
+        D3D11_TEXTURE2D_DESC desc = {};
+        desc.Width                = pixel_data->w;
+        desc.Height               = pixel_data->h;
+        desc.ArraySize            = 1;
+        desc.MipLevels            = 1;
+        desc.Format               = DXGI_FORMAT_R8G8B8A8_UNORM;
+        desc.SampleDesc.Count     = 1;
+        desc.SampleDesc.Quality   = 0;
         desc.Usage                = D3D11_USAGE_IMMUTABLE;
         desc.BindFlags            = D3D11_BIND_SHADER_RESOURCE;
 

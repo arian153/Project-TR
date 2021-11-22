@@ -5,6 +5,7 @@
 
 namespace GAM400
 {
+    class PixelData;
     class RenderTextureBufferCommon;
     class TextTextureBufferCommon;
     class RendererCommon;
@@ -19,6 +20,7 @@ namespace GAM400
         bool Initialize(TextTextureBufferCommon* text_buffer);
         bool Initialize(RenderTextureBufferCommon* render_texture_buffer);
         bool InitializeDefault(RendererCommon* renderer);
+        bool Initialize(RendererCommon* renderer, PixelData* pixel_data);
         bool Shutdown();
         void Bind() const;
 
