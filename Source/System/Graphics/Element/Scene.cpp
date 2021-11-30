@@ -687,6 +687,15 @@ namespace GAM400
         }
     }
 
+    void Scene::UpdatePicking(const Ray& ray)
+    {
+        m_picking_ray = ray;
+        for (auto& terrain : m_terrains)
+        {
+            terrain->UpdatePicking(ray);
+        }
+    }
+
     void Scene::SetUpMesh(Mesh* mesh, MeshData* model_data, const MaterialIdentifier& material, size_t model_id, size_t material_id) const
     {
         if (mesh != nullptr)

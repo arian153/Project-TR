@@ -36,6 +36,11 @@ namespace GAM400
 
             m_terrain->m_input     = m_space->GetLogicSubsystem()->GetInput();
             m_terrain->m_component = this;
+
+            if (m_owner->HasComponent<TransformComponent>())
+            {
+                m_terrain->m_transform = m_owner->GetComponent<TransformComponent>()->GetTransform();
+            }
         }
 
         m_drawing_sphere.radius = 0.1f;
@@ -296,7 +301,7 @@ namespace GAM400
 
     void TerrainComponent::Edit(CommandRegistry* command_registry)
     {
-        if (ImGui::CollapsingHeader(m_type.c_str()))
+        if (ImGui::CollapsingHeader(m_type.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::Text("Material");
             ImGui::Text("Material - Ambient");

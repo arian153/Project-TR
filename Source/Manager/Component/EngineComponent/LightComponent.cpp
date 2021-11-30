@@ -196,30 +196,116 @@ namespace GAM400
             }
 
             ImGui::Text("Ambient Color");
+
+            Color color = m_light->light_data.ambient_color;
             ImGui::ColorEdit4("##Ambient Color", &m_light->light_data.ambient_color.r);
+            if (ImGui::IsItemActivated())
+            {
+                edit_data.ambient_color = color;
+            }
+            if (ImGui::IsItemDeactivatedAfterEdit())
+            {
+                std::string message = "Change Ambient Color";
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  Color,
+                                                  Light,
+                                                  &Light::SetAmbientColor>(m_light, edit_data.ambient_color, m_light->light_data.ambient_color, message));
+            }
 
             if (m_light_type == eLightType::AmbientLight)
             {
                 ImGui::Text("Ambient Range");
+                color = m_light->light_data.ambient_range;
                 ImGui::ColorEdit4("##Ambient Range", &m_light->light_data.ambient_range.r);
+                if (ImGui::IsItemActivated())
+                {
+                    edit_data.ambient_range = color;
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string message = "Change Ambient Range";
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      Color,
+                                                      Light,
+                                                      &Light::SetAmbientRange>(m_light, edit_data.ambient_range, m_light->light_data.ambient_range, message));
+                }
             }
             else
             {
                 ImGui::Text("Diffuse Color");
+                color = m_light->light_data.diffuse_color;
                 if (ImGui::ColorEdit4("##Diffuse Color", &m_light->light_data.diffuse_color.r))
                 {
                 }
+                if (ImGui::IsItemActivated())
+                {
+                    edit_data.diffuse_color = color;
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string message = "Change Diffuse Color";
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      Color,
+                                                      Light,
+                                                      &Light::SetDiffuseColor>(m_light, edit_data.diffuse_color, m_light->light_data.diffuse_color, message));
+                }
 
                 ImGui::Text("Specular Color");
+                color = m_light->light_data.specular_color;
                 ImGui::ColorEdit4("##Specular Color", &m_light->light_data.specular_color.r);
+                if (ImGui::IsItemActivated())
+                {
+                    edit_data.specular_color = color;
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string message = "Change Specular Color";
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      Color,
+                                                      Light,
+                                                      &Light::SetSpecularColor>(m_light, edit_data.specular_color, m_light->light_data.specular_color, message));
+                }
 
                 ImGui::Text("Intensity");
+                Real    vector1 = m_light->light_data.intensity;
+                Vector3 vector3;
                 ImGui::DragFloat("##Intensity", &m_light->light_data.intensity);
+                if (ImGui::IsItemActivated())
+                {
+                    edit_data.intensity = vector1;
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string message = "Change Light Intensity";
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      Real,
+                                                      Light,
+                                                      &Light::SetIntensity>(m_light, edit_data.intensity, m_light->light_data.intensity, message));
+                }
 
                 if (m_light_type == eLightType::DirectionalLight)
                 {
                     ImGui::Text("Direction");
+                    vector3 = m_light->light_data.direction;
                     ImGui::InputFloat3("##Direction", &m_light->light_data.direction.x);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.direction = vector3;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Direction";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Vector3,
+                                                          Light,
+                                                          &Light::SetLightDirection>(m_light, edit_data.direction, m_light->light_data.direction, message));
+                    }
                 }
                 else if (m_light_type == eLightType::PointLight)
                 {
@@ -227,9 +313,37 @@ namespace GAM400
                     ImGui::Text("Position");
                     ImGui::Text("[%.3f, %.3f, %.3f]", pos[0], pos[1], pos[2]);
                     ImGui::Text("Range");
+                    vector1 = m_light->light_data.range;
                     ImGui::InputFloat("##Range", &m_light->light_data.range);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.range = vector1;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Range";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Real,
+                                                          Light,
+                                                          &Light::SetLightRange>(m_light, edit_data.range, m_light->light_data.range, message));
+                    }
                     ImGui::Text("Attenuation");
+                    vector3 = m_light->light_data.attenuation;
                     ImGui::InputFloat3("##Attenuation", &m_light->light_data.attenuation.x);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.attenuation = vector3;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Attenuation";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Vector3,
+                                                          Light,
+                                                          &Light::SetAttenuation>(m_light, edit_data.attenuation, m_light->light_data.attenuation, message));
+                    }
                 }
                 else if (m_light_type == eLightType::SpotLight)
                 {
@@ -238,16 +352,72 @@ namespace GAM400
                     ImGui::Text("[%.3f, %.3f, %.3f]", pos[0], pos[1], pos[2]);
 
                     ImGui::Text("Direction");
+                    vector3 = m_light->light_data.direction;
                     ImGui::InputFloat3("##Direction", &m_light->light_data.direction.x);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.direction = vector3;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Direction";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Vector3,
+                                                          Light,
+                                                          &Light::SetLightDirection>(m_light, edit_data.direction, m_light->light_data.direction, message));
+                    }
 
                     ImGui::Text("Spot");
+                    vector1 = m_light->light_data.spot;
                     ImGui::InputFloat("##Spot", &m_light->light_data.spot);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.spot = vector1;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Spot";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Real,
+                                                          Light,
+                                                          &Light::SetSpot>(m_light, edit_data.spot, m_light->light_data.spot, message));
+                    }
 
                     ImGui::Text("Range");
+                    vector1 = m_light->light_data.range;
                     ImGui::InputFloat("##Range", &m_light->light_data.range);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.range = vector1;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Range";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Real,
+                                                          Light,
+                                                          &Light::SetLightRange>(m_light, edit_data.range, m_light->light_data.range, message));
+                    }
 
                     ImGui::Text("Attenuation");
+                    vector3 = m_light->light_data.attenuation;
                     ImGui::InputFloat3("##Attenuation", &m_light->light_data.attenuation.x);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.attenuation = vector3;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Attenuation";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Vector3,
+                                                          Light,
+                                                          &Light::SetAttenuation>(m_light, edit_data.attenuation, m_light->light_data.attenuation, message));
+                    }
                 }
                 else if (m_light_type == eLightType::CapsuleLight)
                 {
@@ -256,16 +426,72 @@ namespace GAM400
                     ImGui::Text("[%.3f, %.3f, %.3f]", pos[0], pos[1], pos[2]);
 
                     ImGui::Text("Direction");
+                    vector3 = m_light->light_data.direction;
                     ImGui::InputFloat3("##Direction", &m_light->light_data.direction.x);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.direction = vector3;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Direction";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Vector3,
+                                                          Light,
+                                                          &Light::SetLightDirection>(m_light, edit_data.direction, m_light->light_data.direction, message));
+                    }
 
                     ImGui::Text("Length");
+                    vector1 = m_light->light_data.length;
                     ImGui::InputFloat("##Length", &m_light->light_data.length);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.length = vector1;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Length";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Real,
+                                                          Light,
+                                                          &Light::SetLightLength>(m_light, edit_data.length, m_light->light_data.length, message));
+                    }
 
                     ImGui::Text("Range");
+                    vector1 = m_light->light_data.range;
                     ImGui::InputFloat("##Range", &m_light->light_data.range);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.range = vector1;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Range";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Real,
+                                                          Light,
+                                                          &Light::SetLightRange>(m_light, edit_data.range, m_light->light_data.range, message));
+                    }
 
                     ImGui::Text("Attenuation");
+                    vector3 = m_light->light_data.attenuation;
                     ImGui::InputFloat3("##Attenuation", &m_light->light_data.attenuation.x);
+                    if (ImGui::IsItemActivated())
+                    {
+                        edit_data.attenuation = vector3;
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Light Attenuation";
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          Vector3,
+                                                          Light,
+                                                          &Light::SetAttenuation>(m_light, edit_data.attenuation, m_light->light_data.attenuation, message));
+                    }
                 }
             }
         }

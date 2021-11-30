@@ -419,6 +419,10 @@ namespace GAM400
                 {
                     space->GetScene()->IsPickingDown(m_picking_ray);
                 }
+                else
+                {
+                    space->GetScene()->UpdatePicking(m_picking_ray);
+                }
             }
 
             //if (space->GetWorld() != nullptr)

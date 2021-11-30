@@ -79,7 +79,7 @@ namespace GAM400
 
         SubTerrain* Pick(const Vector3& point) const;
 
-        void Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const;
+        void Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output_terrain, std::vector<TerrainFace*>& output_faces) const;
         void CastRay(HitData& result, Real max_distance = -1.0f) const;
 
         Real RootMinY() const;
@@ -97,7 +97,7 @@ namespace GAM400
         Real       m_cell_width     = 100.0f;
         Real       m_cell_depth     = 100.0f;
         int        m_tree_height    = 0;
-        Real       m_size_threshold = 20.0f;
+        Real       m_size_threshold = 500.0f;
 
         std::vector<SpaceNode*> m_nodes;
         std::vector<SpaceNode*> m_leaves;

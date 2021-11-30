@@ -99,6 +99,7 @@ namespace GAM400
 
         void IsPickingPressed(const Ray& ray);
         void IsPickingDown(const Ray& ray);
+        void UpdatePicking(const Ray& ray);
 
     private:
         void SetUpMesh(Mesh* mesh, MeshData* model_data, const MaterialIdentifier& material, size_t model_id, size_t material_id) const;

@@ -8,6 +8,7 @@
 #include "../../Core/Input/KeyboardInput.hpp"
 #include "../../Core/Input/MouseInput.hpp"
 #include "../../Core/Utility/CoreUtility.hpp"
+#include "../../Math/Structure/Transform.hpp"
 #include "../../Math/Utility/NoiseUtility.hpp"
 #include "../../Math/Utility/Utility.inl"
 #include "../Common/Buffer2/ConstantBufferCommon.hpp"
@@ -118,26 +119,45 @@ namespace GAM400
 
             if (mouse->IsDown(eKeyCodeMouse::Right))
             {
-                if (keyboard->IsDown(eKeyCodeKeyboard::Shift_Left))
+                if (m_edit_hit_data.hit)
                 {
-                }
-                else
-                {
-                    if (m_edit_hit_data.hit)
-                    {
-                        Vector3 pos = m_grid.vertices[m_edit_hit_data.closest_idx].GetPosition();
-                        pos.y       = new_pos.y;//m_hit_vertex.y + dy;
+                    Vector3 pos = m_grid.vertices[m_edit_hit_data.closest_idx].GetPosition();
+                    pos.y       = new_pos.y;//m_hit_vertex.y + dy;
 
-                        m_grid.vertices[m_edit_hit_data.closest_idx].SetPosition(pos);
-                        m_edit_hit_data.node->aabb.ExpandY(pos.y, pos.y);
-                        m_edit_hit_data.node->sub_terrain.Update(m_grid);
-                        //m_edit_hit_data.node->sub_terrain.faces[m_edit_hit_data.face_idx].SetVertex(m_edit_hit_data.closest_idx, pos);
-                        m_terrain_space.UpdateAABBNode(m_edit_hit_data.node);
-                        CalculateNTB(m_edit_hit_data.closest_idx);
-                        BuildBuffer(false);
-                    }
+                    m_grid.vertices[m_edit_hit_data.closest_idx].SetPosition(pos);
+                    m_edit_hit_data.node->aabb.ExpandY(pos.y, pos.y);
+                    m_edit_hit_data.node->sub_terrain.Update(m_grid);
+                    //m_edit_hit_data.node->sub_terrain.faces[m_edit_hit_data.face_idx].SetVertex(m_edit_hit_data.closest_idx, pos);
+                    m_terrain_space.UpdateAABBNode(m_edit_hit_data.node);
+                    CalculateNTB(m_edit_hit_data.closest_idx);
+                    BuildBuffer(false);
                 }
             }
+        }
+    }
+
+    void Terrain::UpdatePicking(const Ray& ray)
+    {
+        HitData hit_data(ray);
+        m_terrain_space.CastRay(hit_data);
+
+
+        if (hit_data.hit)
+        {
+            m_component->m_w_idx = hit_data.closest_idx % m_width_div;
+            m_component->m_d_idx = hit_data.closest_idx / m_width_div;
+
+            m_component->m_picking_point = hit_data.intersection;
+            m_hit_vertex                 = m_grid.vertices[hit_data.closest_idx].GetPosition();
+            m_component->m_closest_point = m_hit_vertex;
+
+            auto& hit_face = hit_data.node->sub_terrain.faces[hit_data.face_idx];
+
+            m_component->m_face_a = hit_face.idx_a;
+            m_component->m_face_b = hit_face.idx_b;
+            m_component->m_face_c = hit_face.idx_c;
+
+            m_edit_hit_data = hit_data;
         }
     }
 

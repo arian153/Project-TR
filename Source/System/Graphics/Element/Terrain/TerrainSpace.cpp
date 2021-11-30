@@ -467,16 +467,59 @@ namespace GAM400
         return nullptr;
     }
 
-    void TerrainSpace::Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output) const
+    void TerrainSpace::Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output_terrain, std::vector<TerrainFace*>& output_faces) const
     {
-        //contain case
-        //add full sub-terrain
+        std::queue<SpaceNode*> queue;
+        if (m_root != nullptr)
+        {
+            queue.push(m_root);
+        }
 
+        while (!queue.empty())
+        {
+            SpaceNode& node = *queue.front();
+            queue.pop();
+            TerrainAABB& node_aabb = node.aabb;
 
-        //intersection case
-        //get faces from sub-terrain.
-
-
+            if (aabb.Contains(node_aabb))
+            {
+                //contain case
+                //add full sub-terrain
+                output_terrain.push_back(&node.sub_terrain);
+            }
+            else if (aabb.Intersect(node_aabb))
+            {
+                //intersection case
+                if (node.IsLeaf())
+                {
+                    //get faces from sub-terrain.
+                    node.sub_terrain.Query(aabb, output_faces);
+                }
+                else
+                {
+                    if (aabb.Intersect(node.children[0]->aabb))
+                        queue.push(node.children[0]);
+                    if (aabb.Intersect(node.children[1]->aabb))
+                        queue.push(node.children[1]);
+                    if (aabb.Intersect(node.children[2]->aabb))
+                        queue.push(node.children[2]);
+                    if (aabb.Intersect(node.children[3]->aabb))
+                        queue.push(node.children[3]);
+                }
+            }
+            else if (node_aabb.Contains(aabb))
+            {
+                //check if node contain aabb
+                queue.push(node.children[0]);
+                queue.push(node.children[1]);
+                queue.push(node.children[2]);
+                queue.push(node.children[3]);
+            }
+            else
+            {
+                //no intersection, no contain, so this case aabb is far from the node.
+            }
+        }
     }
 
     void TerrainSpace::CastRay(HitData& result, Real max_distance) const
@@ -542,7 +585,7 @@ namespace GAM400
 
     Real TerrainSpace::RootScaleY() const
     {
-        return  m_root->aabb.Max().y - m_root->aabb.Min().y;
+        return m_root->aabb.Max().y - m_root->aabb.Min().y;
     }
 
     void TerrainSpace::BuildTreeRecursive(SpaceNode* node, int height)

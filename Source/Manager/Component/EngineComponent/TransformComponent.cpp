@@ -277,6 +277,13 @@ namespace GAM400
                 SetOrientation(random_rot);
             }
         }
+        if (JsonResource::HasMember(data, "Edit"))
+        {
+            if (data["Edit"].isBool())
+            {
+                m_b_open = data["Edit"].asBool();
+            }
+        }
         return true;
     }
 
@@ -336,10 +343,10 @@ namespace GAM400
                                                   &TransformComponent::SetOrientation>(this, prev, next));
             }
             ImGui::Text("Radian");
-            if(ImGui::SliderAngle("##TransformEdit3", &radian))
+            if (ImGui::SliderAngle("##TransformEdit3", &radian))
             {
                 AxisRadian prev = m_axis_holder;
-                prev.radian = radian;
+                prev.radian     = radian;
                 m_transform.orientation.Set(prev);
             }
             if (ImGui::IsItemEdited())
@@ -356,7 +363,7 @@ namespace GAM400
                                                   &TransformComponent::SetOrientation>(this, m_axis_holder, m_edit_radian));
             }
             ImGui::Text("Quaternion");
-            if(ImGui::SliderFloat4("##TransformEdit4", quaternion, -1.0f, 1.0f))
+            if (ImGui::SliderFloat4("##TransformEdit4", quaternion, -1.0f, 1.0f))
             {
                 Quaternion edited(quaternion[0], quaternion[1], quaternion[2], quaternion[3]);
                 edited.SetNormalize();

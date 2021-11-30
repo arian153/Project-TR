@@ -1,5 +1,6 @@
 #pragma once
 #include "..//Component.hpp"
+#include "../../../System/Graphics/Common/Buffer2/ConstantBufferData.hpp"
 #include "../../../System/Graphics/Element/LightDef.hpp"
 #include "../../../System/Math/Utility/VectorDef.hpp"
 
@@ -46,5 +47,7 @@ namespace GAM400
         Light*    m_light      = nullptr;
         Transform* m_transform  = nullptr;
         eLightType m_light_type = eLightType::DirectionalLight;
+
+        LightBufferData edit_data;
     };
 }

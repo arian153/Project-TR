@@ -21,6 +21,19 @@ namespace GAM400
         LightBufferData GetLightBuffer() const;
         void            SetType(const eLightType& type);
 
+        void SetAmbientColor(const Color& color);
+        void SetDiffuseColor(const Color& color);
+        void SetSpecularColor(const Color& color);
+        void SetAmbientRange(const Color& color);
+
+        void SetLightDirection(const Vector3& direction);
+        void SetLightRange(const Real& range);
+        void SetLightPosition(const Vector3& position);
+        void SetLightLength(const Real& length);
+        void SetAttenuation(const Vector3& att);
+        void SetSpot(const Real& spot);
+        void SetIntensity(const Real& intensity);
+
     public:
         LightBufferData light_data;
 
