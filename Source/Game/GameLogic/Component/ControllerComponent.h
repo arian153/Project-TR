@@ -34,7 +34,7 @@ namespace Game
         void     Clone(ControllerComponent* origin);
 
     private:
-        GAM400::Real    m_theta  = -GAM400::Math::HALF_PI;
+        GAM400::Real    m_theta  = GAM400::Math::HALF_PI;
         GAM400::Real    m_phi    = GAM400::Math::HALF_PI;
         GAM400::Real    m_radius = 60.0f;
         GAM400::Vector3 target_pos;

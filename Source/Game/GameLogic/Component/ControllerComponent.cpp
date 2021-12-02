@@ -1,4 +1,6 @@
 #include "ControllerComponent.h"
+
+#include "../../../External/JSONCPP/json/json.h"
 #include "../../../System/Core/Input/InputCommon.hpp"
 #include "../../../System/Core/Input/KeyboardInput.hpp"
 #include "../../../Manager/Object/Object.hpp"
@@ -6,6 +8,7 @@
 #include "../../../Manager/Space/Space.hpp"
 #include "../../../System/Logic/LogicSubsystem.hpp"
 #include "../../../Manager/Component/EngineComponent/CameraComponent.hpp"
+#include "../../../Manager/Resource/ResourceType/JsonResource.hpp"
 #include "../../../System/Core/Input/MouseInput.hpp"
 #include "../../../System/Graphics/Utility/TextRenderer.hpp"
 #include "../../../System/Graphics/Element/Scene.hpp"
@@ -168,6 +171,26 @@ namespace Game
 
     bool ControllerComponent::Load(const Json::Value& data)
     {
+        if (JsonResource::HasMember(data, "Phi") && data["Phi"].isDouble())
+        {
+            m_phi = data["Phi"].asFloat();
+        }
+
+        if (JsonResource::HasMember(data, "Theta") && data["Theta"].isDouble())
+        {
+            m_theta = data["Theta"].asFloat();
+        }
+
+        if (m_owner->HasComponent<CameraComponent>())
+        {
+            auto camera = m_owner->GetComponent<CameraComponent>();
+            m_phi       = Math::Clamp(m_phi, 0.1f, Math::PI - 0.1f);
+            eye_pos.x   = m_radius * sinf(m_phi) * cosf(m_theta);
+            eye_pos.z   = m_radius * sinf(m_phi) * sinf(m_theta);
+            eye_pos.y   = m_radius * cosf(m_phi);
+            camera->LookAt(target_pos + eye_pos, target_pos);
+        }
+
         return true;
     }
 

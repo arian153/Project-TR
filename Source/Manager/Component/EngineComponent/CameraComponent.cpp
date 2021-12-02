@@ -81,14 +81,14 @@ namespace GAM400
 
     void CameraComponent::AddDistanceInUpDirection(Real distance) const
     {
-        auto    basis = m_camera->GetBasis();
+        auto    basis  = m_camera->GetBasis();
         Vector3 result = basis.j * distance;
         m_camera->SetPosition(result + m_camera->m_position);
     }
 
     void CameraComponent::AddDistanceInRightDirection(Real distance) const
     {
-        auto    basis = m_camera->GetBasis();
+        auto    basis  = m_camera->GetBasis();
         Vector3 result = basis.i * distance;
         m_camera->SetPosition(result + m_camera->m_position);
     }
@@ -169,6 +169,7 @@ namespace GAM400
         {
             m_camera->m_zoom = data["Zoom"].asFloat();
         }
+
         return true;
     }
 

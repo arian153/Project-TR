@@ -7,6 +7,8 @@
 
 namespace GAM400
 {
+    class KeyboardInput;
+    class InputCommon;
     class ObjectFactory;
     class GUISystem;
     class Application;
@@ -30,6 +32,7 @@ namespace GAM400
         void UpdateObjectTab();
         void UpdateCommandWindow();
         void ShowReadMe();
+        void UpdateShortCuts();
 
     private:
         LevelEditor     m_level_editor;
@@ -39,6 +42,8 @@ namespace GAM400
 
         ObjectFactory*   m_object_factory   = nullptr;
         ResourceManager* m_resource_manager = nullptr;
+        InputCommon*     m_input            = nullptr;
+        KeyboardInput*   m_keyboard         = nullptr;
 
         std::vector<std::string> m_archetype_names;
 

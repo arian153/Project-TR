@@ -76,4 +76,25 @@ namespace GAM400
         Vector3 edge_ac = vertices[c].GetPosition() - vertices[a].GetPosition();
         return CrossProduct(edge_ab, edge_ac).Normalize();
     }
+
+    MeshData& MeshData::operator=(const MeshData& rhs)
+    {
+        if (this != &rhs)
+        {
+            b_resource = rhs.b_resource;
+            stride     = rhs.stride;
+            faces      = rhs.faces;
+            indices    = rhs.indices;
+            vertices   = rhs.vertices;
+        }
+        return *this;
+    }
+
+    MeshData::MeshData(const MeshData& rhs)
+        : b_resource(rhs.b_resource), stride(rhs.stride)
+    {
+        faces    = rhs.faces;
+        indices  = rhs.indices;
+        vertices = rhs.vertices;
+    }
 }

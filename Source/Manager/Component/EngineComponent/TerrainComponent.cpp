@@ -7,6 +7,8 @@
 #include "../../../System/Graphics/Element/Scene.hpp"
 #include "../../../System/Graphics/Element/Terrain.hpp"
 #include "../../../System/Graphics/Utility/PrimitiveRenderer.hpp"
+#include "../../../System/GUI/Editor/Command/CommandRegistry.hpp"
+#include "../../../System/GUI/Editor/Command/EditorCommand.hpp"
 #include "../../../System/Logic/LogicSubsystem.hpp"
 #include "../../Object/Object.hpp"
 #include "../../Resource/ResourceManager.hpp"
@@ -62,16 +64,25 @@ namespace GAM400
 
             Vector3 closest = m_terrain->m_grid.vertices[m_terrain->m_edit_hit_data.closest_idx].GetPosition();
 
-            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), m_picking_point, eRenderingMode::Face, Color(0, 0, 0, 1));
-            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), closest, eRenderingMode::Face, Color(0, 1, 0, 1));
+            if (m_terrain->m_brush_mode == 0)
+            {
+                primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), m_picking_point, eRenderingMode::Face, Color(0, 0, 0, 1));
+                primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), closest, eRenderingMode::Face, Color(0, 1, 0, 1));
 
-            Vector3 face_a = m_terrain->m_grid.vertices[m_face_a].GetPosition();
-            Vector3 face_b = m_terrain->m_grid.vertices[m_face_b].GetPosition();
-            Vector3 face_c = m_terrain->m_grid.vertices[m_face_c].GetPosition();
+                Vector3 face_a = m_terrain->m_grid.vertices[m_face_a].GetPosition();
+                Vector3 face_b = m_terrain->m_grid.vertices[m_face_b].GetPosition();
+                Vector3 face_c = m_terrain->m_grid.vertices[m_face_c].GetPosition();
 
-            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_a, eRenderingMode::Face, Color(1, 0, 0, 1));
-            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_b, eRenderingMode::Face, Color(1, 0, 0, 1));
-            primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_c, eRenderingMode::Face, Color(1, 0, 0, 1));
+                primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_a, eRenderingMode::Face, Color(1, 0, 0, 1));
+                primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_b, eRenderingMode::Face, Color(1, 0, 0, 1));
+                primitive_renderer->DrawPrimitiveInstancing(m_drawing_sphere, Quaternion(), face_c, eRenderingMode::Face, Color(1, 0, 0, 1));
+            }
+            else
+            {
+                m_drawing_box.position = m_picking_point;
+                m_drawing_box.SetBox(m_terrain->m_brush_size.x, m_terrain->m_brush_size.y, m_terrain->m_brush_size.z);
+                primitive_renderer->DrawPrimitive(m_drawing_box, eRenderingMode::Face, Color(0, 1, 0, 0.1f));
+            }
         }
     }
 
@@ -304,26 +315,55 @@ namespace GAM400
         if (ImGui::CollapsingHeader(m_type.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
         {
             ImGui::Text("Material");
+            Color color = m_terrain->m_mat_color.ambient;
             ImGui::Text("Material - Ambient");
             ImGui::ColorEdit4("##Material - Ambient", &m_terrain->m_mat_color.ambient.r);
-
+            if (ImGui::IsItemActivated())
+            {
+                m_material_color.ambient = color;
+            }
             if (ImGui::IsItemDeactivatedAfterEdit())
             {
-                m_terrain->UpdateMaterialBuffer();
+                std::string message = "Change Material Ambient";
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  Color,
+                                                  Terrain,
+                                                  &Terrain::SetMaterialAmbient>(m_terrain, m_material_color.ambient, m_terrain->m_mat_color.ambient, message));
             }
 
             ImGui::Text("Material - Diffuse");
+            color = m_terrain->m_mat_color.diffuse;
             ImGui::ColorEdit4("##Material - Diffuse", &m_terrain->m_mat_color.diffuse.r);
+            if (ImGui::IsItemActivated())
+            {
+                m_material_color.diffuse = color;
+            }
             if (ImGui::IsItemDeactivatedAfterEdit())
             {
-                m_terrain->UpdateMaterialBuffer();
+                std::string message = "Change Material Diffuse";
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  Color,
+                                                  Terrain,
+                                                  &Terrain::SetMaterialDiffuse>(m_terrain, m_material_color.diffuse, m_terrain->m_mat_color.diffuse, message));
             }
 
             ImGui::Text("Material - Specular");
+            color = m_terrain->m_mat_color.specular;
             ImGui::ColorEdit4("##Material - Specular", &m_terrain->m_mat_color.specular.r);
+            if (ImGui::IsItemActivated())
+            {
+                m_material_color.specular = color;
+            }
             if (ImGui::IsItemDeactivatedAfterEdit())
             {
-                m_terrain->UpdateMaterialBuffer();
+                std::string message = "Change Material Specular";
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  Color,
+                                                  Terrain,
+                                                  &Terrain::SetMaterialSpecular>(m_terrain, m_material_color.specular, m_terrain->m_mat_color.specular, message));
             }
             ImGui::Separator();
             ImGui::NewLine();
@@ -331,13 +371,15 @@ namespace GAM400
 
             if (ImGui::Button("Clear Terrain"))
             {
+                m_edit_grid = m_terrain->m_grid;
                 m_terrain->ClearGrid();
-                m_terrain->BuildBuffer();
-            }
 
-            if (ImGui::Button("Build Terrain"))
-            {
-                m_terrain->BuildBuffer();
+                std::string message = "Clear Terrain Grid";
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  MeshData,
+                                                  Terrain,
+                                                  &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
             }
 
             if (ImGui::Button("Export Wavefront OBJ"))
@@ -366,11 +408,29 @@ namespace GAM400
                            , uv_min, uv_max, tint_col, border_col);
             }
 
+            ImGui::RadioButton("Vertex", &m_terrain->m_brush_mode, 0);
+            ImGui::RadioButton("Piling Brush", &m_terrain->m_brush_mode, 1);
+            ImGui::RadioButton("Digging Brush", &m_terrain->m_brush_mode, 2);
+
+            if (m_terrain->m_brush_mode > 0)
+            {
+                ImGui::Text("Brush Size");
+                if (ImGui::SliderFloat("##BrushSize", &m_terrain->m_brush_size.x, 1.0f, 10.0f))
+                {
+                    m_terrain->m_brush_size.y = m_terrain->m_brush_size.x;
+                    m_terrain->m_brush_size.z = m_terrain->m_brush_size.x;
+                }
+
+                ImGui::Text("Brush Intensity");
+            }
+
             ImGui::Text("Terrain Generation Method");
             const char* terrain_gen[] = {"Height-Map", "Trigonometric", "Perlin-Noise"};
 
+            int prev = m_terrain_mode;
             if (ImGui::Combo("##Terrain Generation Mode", &m_terrain_mode, terrain_gen, 3))
             {
+                m_edit_grid = m_terrain->m_grid;
                 if (m_terrain_mode == 0)
                 {
                     if (m_height_map_idx != -1)
@@ -402,7 +462,6 @@ namespace GAM400
                             }
 
                             m_terrain->CalculateNTB();
-                            m_terrain->BuildBuffer();
                         }
                     }
                 }
@@ -410,23 +469,35 @@ namespace GAM400
                 {
                     m_terrain->ClearGrid();
                     m_terrain->GenerateTrigonometric();
-                    m_terrain->BuildBuffer();
                 }
                 else if (m_terrain_mode == 2)
                 {
                     m_terrain->ClearGrid();
                     m_terrain->GeneratePerlinNoise();
                     m_terrain->CalculateNTB();
-                    m_terrain->BuildBuffer();
                 }
+
+                std::string message = "Change  Terrain Generation Method : " + std::string(terrain_gen[prev]) + " To " + std::string(terrain_gen[m_terrain_mode]);
+                command_registry->PushCommand(
+                                              new EditFunction<
+                                                  MeshData,
+                                                  Terrain,
+                                                  &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
             }
 
             if (m_terrain_mode > 0)
             {
                 ImGui::Text("Terrain Width");
-                if (ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width))
+                Real prev_vector1 = m_terrain->m_terrain_width;
+                ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width);
+                if (ImGui::IsItemActivated())
                 {
-                    m_terrain->m_terrain_width = Math::Max(m_terrain->m_terrain_width, 1.0f);
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_width = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->m_terrain_width = Math::Clamp(m_terrain->m_terrain_width, 1.0f, 1000.0f);
                     m_terrain->ClearGrid();
                     if (m_terrain_mode == 1)
                         m_terrain->GenerateTrigonometric();
@@ -435,13 +506,26 @@ namespace GAM400
                         m_terrain->GeneratePerlinNoise();
                         m_terrain->CalculateNTB();
                     }
-                    m_terrain->BuildBuffer();
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Terrain Width";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_width;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_terrain_width;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainWidth>(m_terrain, prev_edit, next_edit, message));
                 }
 
                 ImGui::Text("Terrain Depth");
                 if (ImGui::InputFloat("##Terrain Depth", &m_terrain->m_terrain_depth))
                 {
-                    m_terrain->m_terrain_depth = Math::Max(m_terrain->m_terrain_depth, 1.0f);
+                    m_terrain->m_terrain_depth = Math::Clamp(m_terrain->m_terrain_depth, 1.0f, 1000.0f);
                     m_terrain->ClearGrid();
                     if (m_terrain_mode == 1)
                         m_terrain->GenerateTrigonometric();
@@ -456,7 +540,7 @@ namespace GAM400
                 ImGui::Text("Width LOD");
                 if (ImGui::InputInt("##LOD Width", &m_terrain->m_width_div))
                 {
-                    m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
+                    m_terrain->m_width_div = Math::Clamp(m_terrain->m_width_div, 1, 500);
                     m_terrain->ClearGrid();
                     if (m_terrain_mode == 1)
                         m_terrain->GenerateTrigonometric();
@@ -471,7 +555,7 @@ namespace GAM400
                 ImGui::Text("Depth LOD");
                 if (ImGui::InputInt("##LOD Depth", &m_terrain->m_depth_div))
                 {
-                    m_terrain->m_depth_div = Math::Max(m_terrain->m_depth_div, 1);
+                    m_terrain->m_depth_div = Math::Clamp(m_terrain->m_depth_div, 1, 500);
                     m_terrain->ClearGrid();
                     if (m_terrain_mode == 1)
                         m_terrain->GenerateTrigonometric();
@@ -651,7 +735,7 @@ namespace GAM400
     }
 
     TerrainComponent::TerrainComponent(Object* owner)
-        : Component(owner)
+        : Component(owner), m_edit_width(0), m_edit_depth(0), m_edit_w_lod(0), m_edit_d_lod(0), m_height_map_idx(0)
     {
     }
 

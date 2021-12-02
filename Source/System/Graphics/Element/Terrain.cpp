@@ -34,6 +34,7 @@ namespace GAM400
     void Terrain::Initialize()
     {
         CreateBuffer();
+        m_brush_size = 2.0f;
     }
 
     void Terrain::Update(Real dt)
@@ -105,42 +106,91 @@ namespace GAM400
 
     void Terrain::IsMouseDown(const Ray& ray)
     {
-        if (m_input != nullptr)
+        if (m_brush_mode == 0)
         {
-            auto mouse    = m_input->GetMouseInput();
-            auto keyboard = m_input->GetKeyboardInput();
-
-            int curr_y = mouse->CurrentPosition().y;
-            //int  prev_y = mouse->PreviousPosition().y;
-
-            Vector3 new_pos = ray.position + ray.direction * m_edit_hit_data.t;
-
-            Real dy = 0.01f * static_cast<Real>(m_hit_mouse_y - curr_y);
-
-            if (mouse->IsDown(eKeyCodeMouse::Right))
+            if (m_input != nullptr)
             {
-                if (m_edit_hit_data.hit)
-                {
-                    Vector3 pos = m_grid.vertices[m_edit_hit_data.closest_idx].GetPosition();
-                    pos.y       = new_pos.y;//m_hit_vertex.y + dy;
+                auto mouse    = m_input->GetMouseInput();
+                auto keyboard = m_input->GetKeyboardInput();
 
-                    m_grid.vertices[m_edit_hit_data.closest_idx].SetPosition(pos);
-                    m_edit_hit_data.node->aabb.ExpandY(pos.y, pos.y);
-                    m_edit_hit_data.node->sub_terrain.Update(m_grid);
-                    //m_edit_hit_data.node->sub_terrain.faces[m_edit_hit_data.face_idx].SetVertex(m_edit_hit_data.closest_idx, pos);
-                    m_terrain_space.UpdateAABBNode(m_edit_hit_data.node);
-                    CalculateNTB(m_edit_hit_data.closest_idx);
-                    BuildBuffer(false);
+                int curr_y = mouse->CurrentPosition().y;
+                //int  prev_y = mouse->PreviousPosition().y;
+
+                Vector3 new_pos = ray.position + ray.direction * m_edit_hit_data.t;
+
+                Real dy = 0.01f * static_cast<Real>(m_hit_mouse_y - curr_y);
+
+                if (mouse->IsDown(eKeyCodeMouse::Right))
+                {
+                    if (m_edit_hit_data.hit)
+                    {
+                        Vector3 pos = m_grid.vertices[m_edit_hit_data.closest_idx].GetPosition();
+                        pos.y       = new_pos.y;//m_hit_vertex.y + dy;
+
+                        m_grid.vertices[m_edit_hit_data.closest_idx].SetPosition(pos);
+                        m_edit_hit_data.node->aabb.ExpandY(pos.y, pos.y);
+                        m_edit_hit_data.node->sub_terrain.Update(m_grid);
+                        //m_edit_hit_data.node->sub_terrain.faces[m_edit_hit_data.face_idx].SetVertex(m_edit_hit_data.closest_idx, pos);
+                        m_terrain_space.UpdateAABBNode(m_edit_hit_data.node);
+                        CalculateNTB(m_edit_hit_data.closest_idx);
+                        BuildBuffer(false);
+                    }
                 }
+            }
+        }
+        else if (m_brush_mode > 0)
+        {
+            HitData hit_data(ray);
+            m_terrain_space.CastRay(hit_data);
+
+            if (hit_data.hit)
+            {
+                m_component->m_picking_point = hit_data.intersection;
+                m_brush.SetCenterHalfSize(hit_data.intersection, m_brush_size);
+
+                m_hit_vertex   = m_grid.vertices[hit_data.closest_idx].GetPosition();
+                auto& hit_face = hit_data.node->sub_terrain.faces[hit_data.face_idx];
+
+                m_component->m_face_a = hit_face.idx_a;
+                m_component->m_face_b = hit_face.idx_b;
+                m_component->m_face_c = hit_face.idx_c;
+
+                std::vector<SubTerrain*>  sub_terrains;
+                std::vector<TerrainFace*> faces;
+
+                Real addition = m_brush_mode == 1 ? 0.01f : -0.01f;
+
+                m_terrain_space.ApplyAddition(m_brush, sub_terrains, faces, addition);
+
+                for (auto& sub_terrain : sub_terrains)
+                {
+                    for (auto& face : sub_terrain->faces)
+                    {
+                        CalculateNTB(face);
+                    }
+                }
+
+                for (auto& face : faces)
+                {
+                    CalculateNTB(*face);
+                }
+
+                BuildBuffer(false);
+                m_b_edit_down = true;
             }
         }
     }
 
     void Terrain::UpdatePicking(const Ray& ray)
     {
+        if (m_b_edit_down == true)
+        {
+            m_terrain_space.Update();
+            m_b_edit_down = false;
+        }
+
         HitData hit_data(ray);
         m_terrain_space.CastRay(hit_data);
-
 
         if (hit_data.hit)
         {
@@ -608,5 +658,91 @@ namespace GAM400
                 m_grid.vertices[updated_idx].CalculateTangentAndBinormal();
             }
         }
+    }
+
+    void Terrain::CalculateNTB(const TerrainFace& updated_face)
+    {
+        //Calculate Vertex Normal
+        std::vector<Vector3> normals;
+        Vector3              accumulated_normal;
+        std::set<U32>        updated_indices;
+
+        updated_indices.insert(updated_face.idx_a);
+        updated_indices.insert(updated_face.idx_b);
+        updated_indices.insert(updated_face.idx_c);
+
+        for (auto& face : m_point_indices[updated_face.idx_a].faces)
+        {
+            updated_indices.insert(face.a);
+            updated_indices.insert(face.b);
+            updated_indices.insert(face.c);
+        }
+        for (auto& face : m_point_indices[updated_face.idx_b].faces)
+        {
+            updated_indices.insert(face.a);
+            updated_indices.insert(face.b);
+            updated_indices.insert(face.c);
+        }
+        for (auto& face : m_point_indices[updated_face.idx_c].faces)
+        {
+            updated_indices.insert(face.a);
+            updated_indices.insert(face.b);
+            updated_indices.insert(face.c);
+        }
+
+        normals.clear();
+        accumulated_normal.SetZero();
+
+        for (auto& updated_idx : updated_indices)
+        {
+            normals.clear();
+            accumulated_normal.SetZero();
+
+            for (auto& face : m_point_indices[updated_idx].faces)
+            {
+                Vector3 normal = m_grid.GetFaceNormal(face.a, face.b, face.c);
+                auto    found  = std::find(normals.begin(), normals.end(), normal);
+                if (found == normals.end())
+                {
+                    accumulated_normal += normal;
+                    normals.push_back(normal);
+                }
+            }
+            m_grid.vertices[updated_idx].SetNormal(accumulated_normal.Normalize());
+            m_grid.vertices[updated_idx].CalculateTangentAndBinormal();
+        }
+    }
+
+    void Terrain::SetMaterialAmbient(const Color& color)
+    {
+        m_mat_color.ambient = color;
+        UpdateMaterialBuffer();
+    }
+
+    void Terrain::SetMaterialDiffuse(const Color& color)
+    {
+        m_mat_color.diffuse = color;
+        UpdateMaterialBuffer();
+    }
+
+    void Terrain::SetMaterialSpecular(const Color& color)
+    {
+        m_mat_color.specular = color;
+        UpdateMaterialBuffer();
+    }
+
+    void Terrain::SetGridData(const MeshData& grid_data)
+    {
+        m_grid = grid_data;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainWidth(const EditGridReal& width)
+    {
+        m_grid = width.grid;
+        m_terrain_space.Update();
+        m_terrain_width = width.value;
+        BuildBuffer();
     }
 }

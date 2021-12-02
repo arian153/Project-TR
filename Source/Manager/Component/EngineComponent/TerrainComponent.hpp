@@ -4,6 +4,8 @@
 
 #include "..//Component.hpp"
 #include "../../../System/Graphics/DataType/MaterialData.hpp"
+#include "../../../System/Graphics/DataType/MeshData.hpp"
+#include "../../../System/Math/Primitive/ConvexHull3D/Box.hpp"
 #include "../../../System/Math/Primitive/ConvexHull3D/Sphere.hpp"
 #include "../../../System/Math/Utility/VectorDef.hpp"
 
@@ -42,6 +44,10 @@ namespace GAM400
         Terrain*           m_terrain = nullptr;
         MaterialIdentifier m_material_identifier;
         MaterialColor      m_material_color;
+        MeshData           m_edit_grid;
+
+        Real m_edit_width, m_edit_depth;
+        I32  m_edit_w_lod, m_edit_d_lod;
 
         std::vector<TextResource*> m_height_maps;
         std::vector<std::string>   m_height_map_names;
@@ -56,6 +62,7 @@ namespace GAM400
         Vector3 m_picking_point;
         Vector3 m_closest_point;
         Sphere  m_drawing_sphere;
+        Box     m_drawing_box;
 
         U32 m_face_a = 0;
         U32 m_face_b = 0;

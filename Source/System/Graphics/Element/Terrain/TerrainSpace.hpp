@@ -80,6 +80,7 @@ namespace GAM400
         SubTerrain* Pick(const Vector3& point) const;
 
         void Query(const TerrainAABB& aabb, std::vector<SubTerrain*>& output_terrain, std::vector<TerrainFace*>& output_faces) const;
+        void ApplyAddition(const TerrainAABB& aabb, std::vector<SubTerrain*>& output_terrain, std::vector<TerrainFace*>& output_faces, Real addition);
         void CastRay(HitData& result, Real max_distance = -1.0f) const;
 
         Real RootMinY() const;

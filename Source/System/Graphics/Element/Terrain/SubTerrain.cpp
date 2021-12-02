@@ -71,6 +71,13 @@ namespace GAM400
         return false;
     }
 
+    void TerrainFace::ApplyAddition(Real addition)
+    {
+        vertex_a.y += addition;
+        vertex_b.y += addition;
+        vertex_c.y += addition;
+    }
+
     Vector3 TerrainFace::Normal() const
     {
         Vector3 edge_ab = vertex_b - vertex_a;
@@ -204,6 +211,32 @@ namespace GAM400
             {
                 output_faces.push_back(&face);
             }
+        }
+    }
+
+    void SubTerrain::ApplyAddition(const TerrainAABB& aabb, std::vector<TerrainFace*>& output_faces, Real addition, MeshData& terrain_data)
+    {
+        for (auto& face : faces)
+        {
+            if (face.HasIntersection(aabb))
+            {
+                output_faces.push_back(&face);
+                face.ApplyAddition(addition);
+                terrain_data.vertices[face.idx_a].position.y += addition;
+                terrain_data.vertices[face.idx_b].position.y += addition;
+                terrain_data.vertices[face.idx_c].position.y += addition;
+            }
+        }
+    }
+
+    void SubTerrain::ApplyAddition(Real addition, MeshData& terrain_data)
+    {
+        for (auto& face : faces)
+        {
+            face.ApplyAddition(addition);
+            terrain_data.vertices[face.idx_a].position.y += addition;
+            terrain_data.vertices[face.idx_b].position.y += addition;
+            terrain_data.vertices[face.idx_c].position.y += addition;
         }
     }
 }

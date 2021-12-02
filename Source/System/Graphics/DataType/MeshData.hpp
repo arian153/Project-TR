@@ -23,6 +23,9 @@ namespace GAM400
         void    Normalize(Vector3& min, Vector3& max);
         Vector3 GetFaceNormal(U32 a, U32 b, U32 c);
 
+        MeshData& operator= (const MeshData& rhs);
+        MeshData(const MeshData& rhs);
+
     public:
         std::vector<VertexCommon>      vertices;
         std::vector<GeometryFaceIndex> faces;

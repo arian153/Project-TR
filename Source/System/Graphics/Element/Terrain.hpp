@@ -20,6 +20,17 @@ namespace GAM400
     class VertexBufferCommon;
     class IndexBufferCommon;
 
+    struct EditGridReal
+    {
+        explicit EditGridReal(const MeshData& data)
+            : grid(data)
+        {
+        }
+
+        MeshData  grid;
+        Real      value = 0.0f;
+    };
+
     class Terrain
     {
     public:
@@ -70,6 +81,15 @@ namespace GAM400
         void CalculateGridIndices();
         void SetNoiseSeed(U32 seed);
         void CalculateNTB(U32 idx);
+        void CalculateNTB(const TerrainFace& face);
+
+        void SetMaterialAmbient(const Color& color);
+        void SetMaterialDiffuse(const Color& color);
+        void SetMaterialSpecular(const Color& color);
+
+        void SetGridData(const MeshData& grid_data);
+
+        void SetTerrainWidth(const EditGridReal& width);
 
     private:
         friend class TerrainComponent;
@@ -83,11 +103,16 @@ namespace GAM400
         size_t m_terrain_vertex_size = 0;
         int    m_smooth_level        = 2;
 
+        int         m_brush_mode = 0;
+        TerrainAABB m_brush;
+        Vector3     m_brush_size;
+
         Real m_trigonometric_factor_a = 0.3f;
         Real m_trigonometric_factor_b = 0.05f;
         Real m_perlin_noise_scale     = 100.0f;
         Real m_perlin_noise_density   = 100.0f;
         bool m_b_noise_user_random    = true;
+        bool m_b_edit_down            = false;
 
         Real m_height_map_scale = 100.0f;
 

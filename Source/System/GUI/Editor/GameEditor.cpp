@@ -6,6 +6,8 @@
 #include "../../../Manager/Object/ObjectManager.hpp"
 #include "../../../Manager/Resource/ResourceType/JsonResource.hpp"
 #include "../../../Manager/Space/Space.hpp"
+#include "../../Core/Input/InputCommon.hpp"
+#include "../../Core/Input/KeyboardInput.hpp"
 #include "Command/EditorCommand.hpp"
 
 namespace GAM400
@@ -21,6 +23,8 @@ namespace GAM400
     void GameEditor::Initialize(Application* application)
     {
         m_application                = application;
+        m_input                      = application->GetInput();
+        m_keyboard                   = m_input->GetKeyboardInput();
         m_space_editor.m_game_editor = this;
         m_space_editor.Initialize(application);
         m_window_flags = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
@@ -70,7 +74,7 @@ namespace GAM400
                 m_level_editor.Update(dt);
                 UpdateCommandWindow();
             }
-
+            UpdateShortCuts();
             ShowReadMe();
         }
     }
@@ -137,11 +141,11 @@ namespace GAM400
     {
         if (ImGui::BeginMenu("Edit"))
         {
-            if (ImGui::MenuItem("Undo"))
+            if (ImGui::MenuItem("Undo", "CTRL+Z"))
             {
                 m_command_registry.UndoCommand();
             }
-            if (ImGui::MenuItem("Redo"))
+            if (ImGui::MenuItem("Redo", "CTRL+Y"))
             {
                 m_command_registry.RedoCommand();
             }
@@ -237,6 +241,19 @@ namespace GAM400
                 }
                 ImGui::End();
             }
+        }
+    }
+
+    void GameEditor::UpdateShortCuts()
+    {
+        ImGuiIO& io = ImGui::GetIO();
+        if (io.KeyCtrl && ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Z]))
+        {
+            m_command_registry.UndoCommand();
+        }
+        if (io.KeyCtrl && ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Y]))
+        {
+            m_command_registry.RedoCommand();
         }
     }
 }

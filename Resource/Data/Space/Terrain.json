@@ -18,7 +18,7 @@
           "Type": "class GAM400::TransformComponent",
           "Value": {
             "Orientation": [1, 0, 0, 0],
-            "Position": [0, 0, -60],
+            "Position": [0, 60, -60],
             "Scale": [1, 1, 1]
           }
         },
@@ -26,12 +26,16 @@
           "Type": "class GAM400::CameraComponent",
           "Value": {
             "Orientation": [1, 0, 0, 0],
-            "Position": [0, 0, -60],
+            "Position": [0, 60, -60],
             "Zoom": 1.0
           }
         },
         {
-          "Type": "class Game::ControllerComponent"
+          "Type": "class Game::ControllerComponent",
+          "Value": {
+            "Phi": 0.536691248,
+            "Theta": 0.663228512
+          } 
         }
       ],
       "Name": "Camera"

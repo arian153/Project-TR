@@ -7,6 +7,7 @@
 
 namespace GAM400
 {
+    class Terrain;
     class TerrainAABB;
     class HitData;
     class MeshData;
@@ -22,6 +23,8 @@ namespace GAM400
         void Update(const MeshData& terrain_data);
         bool HasIntersection(const Ray& ray, Real& t) const;
         bool HasIntersection(const TerrainAABB& aabb) const;
+
+        void ApplyAddition(Real addition);
 
         Vector3 Normal() const;
         U32 ClosestIDX(const Vector3& point) const;
@@ -47,6 +50,9 @@ namespace GAM400
         U32 GetVertexIDX(size_t face_idx, const Vector3& point);
 
         void Query(const TerrainAABB& aabb, std::vector<TerrainFace*>& output_faces);
+        void ApplyAddition(const TerrainAABB& aabb, std::vector<TerrainFace*>& output_faces, Real addition, MeshData& terrain_data);
+        void ApplyAddition(Real addition, MeshData& terrain_data);
+
     public:
         Real min_y = 0.0f;
         Real max_y = 0.0f;
