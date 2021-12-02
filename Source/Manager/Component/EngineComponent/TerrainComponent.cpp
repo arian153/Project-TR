@@ -427,14 +427,430 @@ namespace GAM400
             ImGui::Text("Terrain Generation Method");
             const char* terrain_gen[] = {"Height-Map", "Trigonometric", "Perlin-Noise"};
 
-            int prev = m_terrain_mode;
+            int prev_idx = m_terrain_mode;
             if (ImGui::Combo("##Terrain Generation Mode", &m_terrain_mode, terrain_gen, 3))
             {
-                m_edit_grid = m_terrain->m_grid;
-                if (m_terrain_mode == 0)
+                if (prev_idx != m_terrain_mode)
                 {
-                    if (m_height_map_idx != -1)
+                    m_edit_grid = m_terrain->m_grid;
+                    if (m_terrain_mode == 0)
                     {
+                        if (m_height_map_idx != -1)
+                        {
+                            auto resource = m_height_maps[m_height_map_idx];
+
+                            auto pixel_data = resource->GetPixelData();
+                            if (pixel_data != nullptr)
+                            {
+                                U32 width = pixel_data->w;
+                                U32 depth = pixel_data->h;
+
+                                m_terrain->m_terrain_width = (Real)width;
+                                m_terrain->m_terrain_depth = (Real)depth;
+                                m_terrain->m_width_div     = (I32)width;
+                                m_terrain->m_depth_div     = (I32)depth;
+                                m_terrain->ClearGrid();
+
+                                for (U32 w = 0; w < width; ++w)
+                                {
+                                    for (U32 d = 0; d < depth; ++d)
+                                    {
+                                        U32     i     = d * width + w;
+                                        Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
+                                        Real    scale = pixel_data->pixels[i].r;
+                                        p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
+                                        m_terrain->m_grid.vertices[i].SetPosition(p);
+                                    }
+                                }
+
+                                m_terrain->CalculateNTB();
+                            }
+                        }
+                    }
+                    else if (m_terrain_mode == 1)
+                    {
+                        m_terrain->ClearGrid();
+                        m_terrain->GenerateTrigonometric();
+                    }
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->ClearGrid();
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+                    }
+
+                    std::string message = "Change  Terrain Generation Method : " + std::string(terrain_gen[prev_idx]) + " To " + std::string(terrain_gen[m_terrain_mode]);
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      MeshData,
+                                                      Terrain,
+                                                      &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                }
+            }
+
+            if (m_terrain_mode > 0)
+            {
+                ImGui::Text("Terrain Width");
+                Real prev_vector1 = m_terrain->m_terrain_width;
+                ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_width = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->m_terrain_width = Math::Clamp(m_terrain->m_terrain_width, 1.0f, 1000.0f);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+                    }
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Terrain Width";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_width;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_terrain_width;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainWidth>(m_terrain, prev_edit, next_edit, message));
+                }
+
+                ImGui::Text("Terrain Depth");
+                prev_vector1 = m_terrain->m_terrain_depth;
+                ImGui::InputFloat("##Terrain Depth", &m_terrain->m_terrain_depth);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_depth = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->m_terrain_depth = Math::Clamp(m_terrain->m_terrain_depth, 1.0f, 1000.0f);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+                    }
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Terrain Depth";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_depth;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_terrain_depth;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainDepth>(m_terrain, prev_edit, next_edit, message));
+                }
+
+                ImGui::Text("Width LOD");
+                I32 prev_i32 = m_terrain->m_width_div;
+                ImGui::InputInt("##LOD Width", &m_terrain->m_width_div);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_w_lod = prev_i32;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->m_width_div = Math::Clamp(m_terrain->m_width_div, 1, 400);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+                    }
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string message = "Change Terrain Width LOD";
+                    EditGridI32 prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_w_lod;
+                    EditGridI32 next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_width_div;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridI32,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainWidthLOD>(m_terrain, prev_edit, next_edit, message));
+                }
+
+                ImGui::Text("Depth LOD");
+                prev_i32 = m_terrain->m_depth_div;
+                ImGui::InputInt("##LOD Depth", &m_terrain->m_depth_div);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_d_lod = prev_i32;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->m_depth_div = Math::Clamp(m_terrain->m_depth_div, 1, 400);
+                    m_terrain->ClearGrid();
+                    if (m_terrain_mode == 1)
+                        m_terrain->GenerateTrigonometric();
+                    else if (m_terrain_mode == 2)
+                    {
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+                    }
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string message = "Change Terrain Depth LOD";
+                    EditGridI32 prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_d_lod;
+                    EditGridI32 next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_depth_div;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridI32,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainDepthLOD>(m_terrain, prev_edit, next_edit, message));
+                }
+            }
+
+            if (m_terrain_mode == 1)
+            {
+                ImGui::Text("Trigonometric Scale");
+                Real prev_vector1 = m_terrain->m_trigonometric_factor_a;
+                ImGui::SliderFloat("##Terrain Trigonometric A", &m_terrain->m_trigonometric_factor_a, -1.0f, 1.0f);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_tri_a = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->GenerateTrigonometric();
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Trigonometric Scale";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_tri_a;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_trigonometric_factor_a;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainTriA>(m_terrain, prev_edit, next_edit, message));
+                }
+
+                ImGui::Text("Trigonometric Density");
+                prev_vector1 = m_terrain->m_trigonometric_factor_b;
+
+                ImGui::SliderFloat("##Terrain Trigonometric B", &m_terrain->m_trigonometric_factor_b, -0.3f, 0.3f);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_tri_b = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->GenerateTrigonometric();
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Trigonometric Density";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_tri_b;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_trigonometric_factor_b;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainTriB>(m_terrain, prev_edit, next_edit, message));
+                }
+            }
+
+            else if (m_terrain_mode == 2)
+            {
+                ImGui::Separator();
+                ImGui::Text("Perlin Noise Scale");
+                Real prev_vector1 = m_terrain->m_perlin_noise_scale;
+                ImGui::SliderFloat("##Perlin Noise Scale", &m_terrain->m_perlin_noise_scale, 1.0f, 400.0f);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_per_s = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->GeneratePerlinNoise();
+                    if (!m_terrain->m_b_analytical_normal)
+                        m_terrain->CalculateNTB();
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Perlin Noise Scale";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_per_s;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_perlin_noise_scale;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainPerS>(m_terrain, prev_edit, next_edit, message));
+                }
+
+                ImGui::Text("Perlin Noise Density");
+                prev_vector1 = m_terrain->m_perlin_noise_density;
+                ImGui::SliderFloat("##Perlin Noise Density", &m_terrain->m_perlin_noise_density, 1.0f, 400.0f);
+                if (ImGui::IsItemActivated())
+                {
+                    m_edit_grid  = m_terrain->m_grid;
+                    m_edit_per_d = prev_vector1;
+                }
+                if (ImGui::IsItemEdited())
+                {
+                    m_terrain->GeneratePerlinNoise();
+                    if (!m_terrain->m_b_analytical_normal)
+                        m_terrain->CalculateNTB();
+                }
+                if (ImGui::IsItemDeactivatedAfterEdit())
+                {
+                    std::string  message = "Change Perlin Noise Density";
+                    EditGridReal prev_edit(m_edit_grid);
+                    prev_edit.value = m_edit_per_d;
+                    EditGridReal next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain->m_perlin_noise_density;
+
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      EditGridReal,
+                                                      Terrain,
+                                                      &Terrain::SetTerrainPerD>(m_terrain, prev_edit, next_edit, message));
+                }
+
+                ImGui::Text("Interpolation Mode");
+                const char* interpolation_mode[] = {"Smooth Order Linear", "Smooth Order Cubic", "Smooth Order Quintic", "Smooth Order Septic"};
+                prev_idx                         = m_terrain->m_smooth_level;
+
+                if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 4))
+                {
+                    if (prev_idx != m_terrain->m_smooth_level)
+                    {
+                        m_edit_grid = m_terrain->m_grid;
+
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+
+                        std::string message = "Change Interpolation Mode : " + std::string(interpolation_mode[prev_idx]) + " To " + std::string(interpolation_mode[m_terrain->m_smooth_level]);
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          MeshData,
+                                                          Terrain,
+                                                          &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                    }
+                }
+
+                if (ImGui::Checkbox("Use Random Seed##RandOrPerm", &m_terrain->m_b_noise_user_random))
+                {
+                    m_edit_grid = m_terrain->m_grid;
+                    m_terrain->GeneratePerlinNoise();
+                    if (!m_terrain->m_b_analytical_normal)
+                        m_terrain->CalculateNTB();
+
+                    std::string message = m_terrain->m_b_noise_user_random ? "Use Permutation to Random Seed" : "Use Random Seed to Permutation";
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      MeshData,
+                                                      Terrain,
+                                                      &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                }
+
+                if (ImGui::Checkbox("Use Analytical NBT##OrFaceNormal", &m_terrain->m_b_analytical_normal))
+                {
+                    m_edit_grid = m_terrain->m_grid;
+                    m_terrain->GeneratePerlinNoise();
+                    if (!m_terrain->m_b_analytical_normal)
+                        m_terrain->CalculateNTB();
+                    std::string message = m_terrain->m_b_analytical_normal ? "Use Face NBT to Analytical NBT" : "Use Analytical NBT to Face NBT";
+                    command_registry->PushCommand(
+                                                  new EditFunction<
+                                                      MeshData,
+                                                      Terrain,
+                                                      &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                }
+
+                if (m_terrain->m_b_noise_user_random)
+                {
+                    U32 prev_seed = m_noise_seed;
+                    ImGui::Text("Noise Seed");
+                    ImGui::SliderInt("##Slider Seed", (int*)&m_noise_seed, 0, 999999);
+                    if (ImGui::IsItemActivated())
+                    {
+                        m_edit_grid = m_terrain->m_grid;
+                        m_edit_seed = prev_seed;
+                    }
+                    if (ImGui::IsItemEdited())
+                    {
+                        m_terrain->SetNoiseSeed(m_noise_seed);
+                        m_terrain->GeneratePerlinNoise();
+                        if (!m_terrain->m_b_analytical_normal)
+                            m_terrain->CalculateNTB();
+                    }
+                    if (ImGui::IsItemDeactivatedAfterEdit())
+                    {
+                        std::string message = "Change Perlin Noise Seed";
+                        EditGridI32 prev_edit(m_edit_grid);
+                        prev_edit.value = (I32)m_edit_seed;
+                        EditGridI32 next_edit(m_terrain->m_grid);
+                        next_edit.value = (I32)m_noise_seed;
+
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          EditGridI32,
+                                                          TerrainComponent,
+                                                          &TerrainComponent::SetTerrainSeed>(this, prev_edit, next_edit, message));
+                    }
+                }
+            }
+            else if (m_terrain_mode == 0)
+            {
+                ImGui::Text("Height Map");
+
+                int height_map_count = (int)m_height_map_names.size();
+                prev_idx             = m_height_map_idx;
+                if (ImGui::Combo("##Height Map Select", &m_height_map_idx, VectorStringGetter, (void*)&m_height_map_names, height_map_count))
+                {
+                    if (prev_idx != m_height_map_idx)
+                    {
+                        m_edit_grid   = m_terrain->m_grid;
                         auto resource = m_height_maps[m_height_map_idx];
 
                         auto pixel_data = resource->GetPixelData();
@@ -462,251 +878,72 @@ namespace GAM400
                             }
 
                             m_terrain->CalculateNTB();
+                            m_terrain->BuildBuffer();
                         }
+
+                        std::string message = prev_idx == -1
+                                                  ? "Select Height Map : " + std::string(m_height_map_names[m_height_map_idx])
+                                                  : "Change Height Map : " + std::string(m_height_map_names[prev_idx]) + " To " + std::string(m_height_map_names[m_height_map_idx]);
+                        command_registry->PushCommand(
+                                                      new EditFunction<
+                                                          MeshData,
+                                                          Terrain,
+                                                          &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
                     }
                 }
-                else if (m_terrain_mode == 1)
-                {
-                    m_terrain->ClearGrid();
-                    m_terrain->GenerateTrigonometric();
-                }
-                else if (m_terrain_mode == 2)
-                {
-                    m_terrain->ClearGrid();
-                    m_terrain->GeneratePerlinNoise();
-                    m_terrain->CalculateNTB();
-                }
 
-                std::string message = "Change  Terrain Generation Method : " + std::string(terrain_gen[prev]) + " To " + std::string(terrain_gen[m_terrain_mode]);
-                command_registry->PushCommand(
-                                              new EditFunction<
-                                                  MeshData,
-                                                  Terrain,
-                                                  &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
-            }
-
-            if (m_terrain_mode > 0)
-            {
-                ImGui::Text("Terrain Width");
-                Real prev_vector1 = m_terrain->m_terrain_width;
-                ImGui::InputFloat("##Terrain Width", &m_terrain->m_terrain_width);
+                ImGui::Text("Height Map Scale");
+                Real prev_vector1 = m_terrain->m_height_map_scale;
+                ImGui::SliderFloat("##Height Map Scale", &m_terrain->m_height_map_scale, 1.0f, 400.0f);
                 if (ImGui::IsItemActivated())
                 {
-                    m_edit_grid  = m_terrain->m_grid;
-                    m_edit_width = prev_vector1;
+                    m_edit_grid     = m_terrain->m_grid;
+                    m_edit_hm_scale = prev_vector1;
                 }
                 if (ImGui::IsItemEdited())
                 {
-                    m_terrain->m_terrain_width = Math::Clamp(m_terrain->m_terrain_width, 1.0f, 1000.0f);
-                    m_terrain->ClearGrid();
-                    if (m_terrain_mode == 1)
-                        m_terrain->GenerateTrigonometric();
-                    else if (m_terrain_mode == 2)
+                    auto resource = m_height_maps[m_height_map_idx];
+
+                    auto pixel_data = resource->GetPixelData();
+                    if (pixel_data != nullptr)
                     {
-                        m_terrain->GeneratePerlinNoise();
+                        U32 width = pixel_data->w;
+                        U32 depth = pixel_data->h;
+
+                        m_terrain->m_terrain_width = (Real)width;
+                        m_terrain->m_terrain_depth = (Real)depth;
+                        m_terrain->m_width_div     = (I32)width;
+                        m_terrain->m_depth_div     = (I32)depth;
+                        m_terrain->ClearGrid();
+
+                        for (U32 w = 0; w < width; ++w)
+                        {
+                            for (U32 d = 0; d < depth; ++d)
+                            {
+                                U32     i     = d * width + w;
+                                Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
+                                Real    scale = pixel_data->pixels[i].r;
+                                p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
+                                m_terrain->m_grid.vertices[i].SetPosition(p);
+                            }
+                        }
+
                         m_terrain->CalculateNTB();
                     }
                 }
                 if (ImGui::IsItemDeactivatedAfterEdit())
                 {
-                    std::string  message = "Change Terrain Width";
+                    std::string  message = "Change Height Map Scale";
                     EditGridReal prev_edit(m_edit_grid);
-                    prev_edit.value = m_edit_width;
+                    prev_edit.value = m_edit_hm_scale;
                     EditGridReal next_edit(m_terrain->m_grid);
-                    next_edit.value = m_terrain->m_terrain_width;
+                    next_edit.value = m_terrain->m_height_map_scale;
 
                     command_registry->PushCommand(
                                                   new EditFunction<
                                                       EditGridReal,
                                                       Terrain,
-                                                      &Terrain::SetTerrainWidth>(m_terrain, prev_edit, next_edit, message));
-                }
-
-                ImGui::Text("Terrain Depth");
-                if (ImGui::InputFloat("##Terrain Depth", &m_terrain->m_terrain_depth))
-                {
-                    m_terrain->m_terrain_depth = Math::Clamp(m_terrain->m_terrain_depth, 1.0f, 1000.0f);
-                    m_terrain->ClearGrid();
-                    if (m_terrain_mode == 1)
-                        m_terrain->GenerateTrigonometric();
-                    else if (m_terrain_mode == 2)
-                    {
-                        m_terrain->GeneratePerlinNoise();
-                        m_terrain->CalculateNTB();
-                    }
-                    m_terrain->BuildBuffer();
-                }
-
-                ImGui::Text("Width LOD");
-                if (ImGui::InputInt("##LOD Width", &m_terrain->m_width_div))
-                {
-                    m_terrain->m_width_div = Math::Clamp(m_terrain->m_width_div, 1, 500);
-                    m_terrain->ClearGrid();
-                    if (m_terrain_mode == 1)
-                        m_terrain->GenerateTrigonometric();
-                    else if (m_terrain_mode == 2)
-                    {
-                        m_terrain->GeneratePerlinNoise();
-                        m_terrain->CalculateNTB();
-                    }
-                    m_terrain->BuildBuffer();
-                }
-
-                ImGui::Text("Depth LOD");
-                if (ImGui::InputInt("##LOD Depth", &m_terrain->m_depth_div))
-                {
-                    m_terrain->m_depth_div = Math::Clamp(m_terrain->m_depth_div, 1, 500);
-                    m_terrain->ClearGrid();
-                    if (m_terrain_mode == 1)
-                        m_terrain->GenerateTrigonometric();
-                    else if (m_terrain_mode == 2)
-                    {
-                        m_terrain->GeneratePerlinNoise();
-                        m_terrain->CalculateNTB();
-                    }
-
-                    m_terrain->BuildBuffer();
-                }
-            }
-
-            if (m_terrain_mode == 1)
-            {
-                ImGui::Text("Trigonometric Scale");
-                if (ImGui::SliderFloat("##Terrain Trigonometric A", &m_terrain->m_trigonometric_factor_a, -1.0f, 1.0f))
-                {
-                    //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
-                    m_terrain->GenerateTrigonometric();
-                    m_terrain->BuildBuffer();
-                }
-
-                ImGui::Text("Trigonometric Density");
-                if (ImGui::SliderFloat("##Terrain Trigonometric B", &m_terrain->m_trigonometric_factor_b, -0.3f, 0.3f))
-                {
-                    //m_terrain->m_width_div = Math::Max(m_terrain->m_width_div, 1);
-                    m_terrain->GenerateTrigonometric();
-                    m_terrain->BuildBuffer();
-                }
-            }
-
-            else if (m_terrain_mode == 2)
-            {
-                ImGui::Separator();
-                ImGui::Text("Perlin Noise Scale");
-                if (ImGui::SliderFloat("##Perlin Noise Scale", &m_terrain->m_perlin_noise_scale, 1.0f, 400.0f))
-                {
-                    m_terrain->GeneratePerlinNoise();
-                    m_terrain->CalculateNTB();
-                    m_terrain->BuildBuffer();
-                }
-
-                ImGui::Text("Perlin Noise Density");
-                if (ImGui::SliderFloat("##Perlin Noise Density", &m_terrain->m_perlin_noise_density, 1.0f, 400.0f))
-                {
-                    m_terrain->GeneratePerlinNoise();
-                    m_terrain->CalculateNTB();
-                    m_terrain->BuildBuffer();
-                }
-
-                ImGui::Text("Interpolation Mode");
-                const char* interpolation_mode[] = {"Smooth Order Linear", "Smooth Order Cubic", "Smooth Order Quintic", "Smooth Order Septic"};
-
-                if (ImGui::Combo("##Interpolation Mode", &m_terrain->m_smooth_level, interpolation_mode, 4))
-                {
-                    m_terrain->GeneratePerlinNoise();
-                    m_terrain->CalculateNTB();
-                    m_terrain->BuildBuffer();
-                }
-
-                if (ImGui::Checkbox("Use Random Seed##RandOrPerm", &m_terrain->m_b_noise_user_random))
-                {
-                    m_terrain->GeneratePerlinNoise();
-                    m_terrain->CalculateNTB();
-                    m_terrain->BuildBuffer();
-                }
-
-                if (m_terrain->m_b_noise_user_random)
-                {
-                    ImGui::Text("Noise Seed");
-                    if (ImGui::SliderInt("##Slider Seed", (int*)&m_noise_seed, 0, 999999))
-                    {
-                        m_terrain->SetNoiseSeed(m_noise_seed);
-                        m_terrain->GeneratePerlinNoise();
-                        m_terrain->CalculateNTB();
-                        m_terrain->BuildBuffer();
-                    }
-                }
-            }
-            else if (m_terrain_mode == 0)
-            {
-                ImGui::Text("Height Map");
-
-                int height_map_count = (int)m_height_map_names.size();
-
-                if (ImGui::Combo("##Height Map Select", &m_height_map_idx, VectorStringGetter, (void*)&m_height_map_names, height_map_count))
-                {
-                    auto resource = m_height_maps[m_height_map_idx];
-
-                    auto pixel_data = resource->GetPixelData();
-                    if (pixel_data != nullptr)
-                    {
-                        U32 width = pixel_data->w;
-                        U32 depth = pixel_data->h;
-
-                        m_terrain->m_terrain_width = (Real)width;
-                        m_terrain->m_terrain_depth = (Real)depth;
-                        m_terrain->m_width_div     = (I32)width;
-                        m_terrain->m_depth_div     = (I32)depth;
-                        m_terrain->ClearGrid();
-
-                        for (U32 w = 0; w < width; ++w)
-                        {
-                            for (U32 d = 0; d < depth; ++d)
-                            {
-                                U32     i     = d * width + w;
-                                Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
-                                Real    scale = pixel_data->pixels[i].r;
-                                p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
-                                m_terrain->m_grid.vertices[i].SetPosition(p);
-                            }
-                        }
-
-                        m_terrain->CalculateNTB();
-                        m_terrain->BuildBuffer();
-                    }
-                }
-
-                ImGui::Text("Height Map Scale");
-                if (ImGui::SliderFloat("##Height Map Scale", &m_terrain->m_height_map_scale, 1.0f, 400.0f))
-                {
-                    auto resource = m_height_maps[m_height_map_idx];
-
-                    auto pixel_data = resource->GetPixelData();
-                    if (pixel_data != nullptr)
-                    {
-                        U32 width = pixel_data->w;
-                        U32 depth = pixel_data->h;
-
-                        m_terrain->m_terrain_width = (Real)width;
-                        m_terrain->m_terrain_depth = (Real)depth;
-                        m_terrain->m_width_div     = (I32)width;
-                        m_terrain->m_depth_div     = (I32)depth;
-                        m_terrain->ClearGrid();
-
-                        for (U32 w = 0; w < width; ++w)
-                        {
-                            for (U32 d = 0; d < depth; ++d)
-                            {
-                                U32     i     = d * width + w;
-                                Vector3 p     = m_terrain->m_grid.vertices[i].GetPosition();
-                                Real    scale = pixel_data->pixels[i].r;
-                                p.y           = (scale * 2.0f - 1.0f) * m_terrain->m_height_map_scale;
-                                m_terrain->m_grid.vertices[i].SetPosition(p);
-                            }
-                        }
-
-                        m_terrain->CalculateNTB();
-                        m_terrain->BuildBuffer();
-                    }
+                                                      &Terrain::SetTerrainHMS>(m_terrain, prev_edit, next_edit, message));
                 }
             }
         }
@@ -735,11 +972,19 @@ namespace GAM400
     }
 
     TerrainComponent::TerrainComponent(Object* owner)
-        : Component(owner), m_edit_width(0), m_edit_depth(0), m_edit_w_lod(0), m_edit_d_lod(0), m_height_map_idx(0)
+        : Component(owner), m_edit_width(0), m_edit_depth(0), m_edit_w_lod(0), m_edit_d_lod(0), m_edit_tri_a(0), m_edit_tri_b(0), m_edit_per_s(0), m_edit_per_d(0), m_edit_hm_scale(0)
     {
     }
 
     void TerrainComponent::Clone(TerrainComponent* origin)
     {
+    }
+
+    void TerrainComponent::SetTerrainSeed(const EditGridI32& data)
+    {
+        m_noise_seed      = (U32)data.value;
+        m_terrain->m_grid = data.grid;
+        m_terrain->m_terrain_space.Update();
+        m_terrain->BuildBuffer();
     }
 }

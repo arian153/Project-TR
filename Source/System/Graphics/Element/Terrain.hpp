@@ -27,8 +27,19 @@ namespace GAM400
         {
         }
 
-        MeshData  grid;
-        Real      value = 0.0f;
+        MeshData grid;
+        Real     value = 0.0f;
+    };
+
+    struct EditGridI32
+    {
+        explicit EditGridI32(const MeshData& data)
+            : grid(data)
+        {
+        }
+
+        MeshData grid;
+        I32      value = 0;
     };
 
     class Terrain
@@ -61,7 +72,6 @@ namespace GAM400
         void ClearGrid();
 
         void GeneratePerlinNoise();
-        void AddPerlinNoise();
 
         void AddTexture(TextureCommon* texture);
         void ClearTexture();
@@ -88,8 +98,17 @@ namespace GAM400
         void SetMaterialSpecular(const Color& color);
 
         void SetGridData(const MeshData& grid_data);
-
         void SetTerrainWidth(const EditGridReal& width);
+        void SetTerrainDepth(const EditGridReal& depth);
+        void SetTerrainWidthLOD(const EditGridI32& w_lod);
+        void SetTerrainDepthLOD(const EditGridI32& d_lod);
+
+        void SetTerrainTriA(const EditGridReal& data);
+        void SetTerrainTriB(const EditGridReal& data);
+        void SetTerrainPerS(const EditGridReal& data);
+        void SetTerrainPerD(const EditGridReal& data);
+
+        void SetTerrainHMS(const EditGridReal& data);
 
     private:
         friend class TerrainComponent;
@@ -112,6 +131,7 @@ namespace GAM400
         Real m_perlin_noise_scale     = 100.0f;
         Real m_perlin_noise_density   = 100.0f;
         bool m_b_noise_user_random    = true;
+        bool m_b_analytical_normal         = false;
         bool m_b_edit_down            = false;
 
         Real m_height_map_scale = 100.0f;

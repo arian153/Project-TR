@@ -437,36 +437,36 @@ namespace GAM400
 
         size_t size = m_grid.vertices.size();
 
-        for (size_t i = 0; i < size; ++i)
+        if (m_b_analytical_normal)
         {
-            Vector3 p = m_grid.vertices[i].GetPosition();
-            Vector3 d;
-            p.y = m_perlin_noise_scale * m_noise_utility.Noise(
-                                                               Vector3(
-                                                                       (p.x + half_width) / m_perlin_noise_density,
-                                                                       0.0f,
-                                                                       (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
-            m_grid.vertices[i].SetPosition(p);
+            for (size_t i = 0; i < size; ++i)
+            {
+                Vector3 p = m_grid.vertices[i].GetPosition();
+                Vector3 d;
+                p.y = m_perlin_noise_scale * m_noise_utility.Noise(
+                                                                   Vector3(
+                                                                           (p.x + half_width) / m_perlin_noise_density,
+                                                                           0.0f,
+                                                                           (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
+                m_grid.vertices[i].SetPosition(p);
+                m_grid.vertices[i].SetNormal(Vector3(-d.x, 1, -d.z).Unit());
+                m_grid.vertices[i].SetTangent(Vector3(1, d.x, 0).Unit());
+                m_grid.vertices[i].SetBinormal(Vector3(0, d.z, 1).Unit());
+            }
         }
-    }
-
-    void Terrain::AddPerlinNoise()
-    {
-        Real half_width = m_terrain_width * 0.5f;
-        Real half_depth = m_terrain_depth * 0.5f;
-
-        size_t size = m_grid.vertices.size();
-
-        for (size_t i = 0; i < size; ++i)
+        else
         {
-            Vector3 p = m_grid.vertices[i].GetPosition();
-            Vector3 d;
-            p.y += m_perlin_noise_scale * m_noise_utility.Noise(
-                                                                Vector3(
-                                                                        (p.x + half_width) / m_perlin_noise_density,
-                                                                        0.0f,
-                                                                        (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
-            m_grid.vertices[i].SetPosition(p);
+            for (size_t i = 0; i < size; ++i)
+            {
+                Vector3 p = m_grid.vertices[i].GetPosition();
+                Vector3 d;
+                p.y = m_perlin_noise_scale * m_noise_utility.Noise(
+                                                                   Vector3(
+                                                                           (p.x + half_width) / m_perlin_noise_density,
+                                                                           0.0f,
+                                                                           (p.z + half_depth) / m_perlin_noise_density), d, m_smooth_level, m_b_noise_user_random);
+                m_grid.vertices[i].SetPosition(p);
+            }
         }
     }
 
@@ -740,9 +740,73 @@ namespace GAM400
 
     void Terrain::SetTerrainWidth(const EditGridReal& width)
     {
-        m_grid = width.grid;
-        m_terrain_space.Update();
         m_terrain_width = width.value;
+        m_grid          = width.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainDepth(const EditGridReal& depth)
+    {
+        m_terrain_depth = depth.value;
+        m_grid          = depth.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainWidthLOD(const EditGridI32& w_lod)
+    {
+        m_width_div = w_lod.value;
+        m_grid      = w_lod.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainDepthLOD(const EditGridI32& d_lod)
+    {
+        m_depth_div = d_lod.value;
+        m_grid      = d_lod.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainTriA(const EditGridReal& data)
+    {
+        m_trigonometric_factor_a = data.value;
+        m_grid                   = data.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainTriB(const EditGridReal& data)
+    {
+        m_trigonometric_factor_b = data.value;
+        m_grid                   = data.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainPerS(const EditGridReal& data)
+    {
+        m_perlin_noise_scale = data.value;
+        m_grid               = data.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainPerD(const EditGridReal& data)
+    {
+        m_perlin_noise_density = data.value;
+        m_grid                 = data.grid;
+        m_terrain_space.Update();
+        BuildBuffer();
+    }
+
+    void Terrain::SetTerrainHMS(const EditGridReal& data)
+    {
+        m_height_map_scale = data.value;
+        m_grid             = data.grid;
+        m_terrain_space.Update();
         BuildBuffer();
     }
 }
