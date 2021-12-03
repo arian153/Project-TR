@@ -10,6 +10,7 @@
 
 namespace GAM400
 {
+    class CommandRegistry;
     class Transform;
     class InputCommon;
     class Matrix44;
@@ -73,8 +74,8 @@ namespace GAM400
         void ReleaseBuffer();
         void BuildBuffer(bool update_space = true);
 
-        void ExportPPM();
-        void ExportOBJ();
+        std::string ExportPPM(const std::string& root_path);
+        std::string ExportOBJ(const std::string& root_path);
 
         void    GenerateTrigonometric();
         Real    GenerateTrigonometricHeight(Real x, Real z) const;
@@ -103,6 +104,8 @@ namespace GAM400
         void SetNoiseSeed(U32 seed);
         void CalculateNTB(U32 idx);
         void CalculateNTB(const TerrainFace& face);
+
+        void SetCommandRegistry(CommandRegistry* command_registry);
 
         void SetMaterialAmbient(const Color& color);
         void SetMaterialDiffuse(const Color& color);
@@ -175,5 +178,7 @@ namespace GAM400
         ConstantBufferCommon* m_matrix_buffer   = nullptr;
         ConstantBufferCommon* m_texture_buffer  = nullptr;
         ConstantBufferCommon* m_material_buffer = nullptr;
+
+        CommandRegistry* m_command_registry = nullptr;
     };
 }

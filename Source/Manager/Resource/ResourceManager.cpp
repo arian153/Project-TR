@@ -446,6 +446,11 @@ namespace GAM400
         return m_root_path;
     }
 
+    std::string ResourceManager::GetRootPathM() const
+    {
+        return ToString(m_root_path);
+    }
+
     ShaderResource* ResourceManager::GetShaderResource(const std::wstring& path)
     {
         auto found = m_shader_resource_map.find(path);
@@ -767,6 +772,13 @@ namespace GAM400
                 resources.push_back(resource);
             }
         }
+    }
+
+    void ResourceManager::CreateResourceFileFromPath(const std::string& path)
+    {
+        std::wstring file_path = ToWString(path);
+        m_file_list.push_back(file_path);
+        AddResource(file_path);
     }
 
     void ResourceManager::QueryFilePathRecursive(const std::wstring& path, std::list<std::wstring>& file_list, std::list<std::wstring>& directory_list) const

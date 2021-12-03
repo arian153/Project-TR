@@ -94,6 +94,11 @@ namespace GAM400
         m_b_open = is_open;
     }
 
+    CommandRegistry* GameEditor::GetCommandRegistry() 
+    {
+        return &m_command_registry;
+    }
+
     void GameEditor::UpdateFileTab()
     {
         if (ImGui::BeginMenu("File"))
@@ -213,7 +218,7 @@ namespace GAM400
         ImGui::PushItemWidth(max.x - min.x);
         auto commands = m_command_registry.m_command_registry;
         if (ImGui::ListBox(
-                           "##ObjectList", &m_command_index, Items_CommandGetter,
+                           "##CommandsObjectList", &m_command_index, Items_CommandGetter,
                            static_cast<void*>(&commands), static_cast<int>(commands.size()), (int)m_command_registry.m_registry_size))
         {
         }

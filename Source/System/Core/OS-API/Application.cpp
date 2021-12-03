@@ -65,6 +65,7 @@ namespace GAM400
 
         m_space_manager = new SpaceManager(m_render_system, m_object_factory, m_component_registry, m_resource_manager, m_logic_system);
         m_space_manager->Initialize();
+        m_space_manager->SetApplication(this);
 
         m_object_factory->LoadArchetype(m_resource_manager);
 

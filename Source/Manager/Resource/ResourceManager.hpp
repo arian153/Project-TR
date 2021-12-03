@@ -37,6 +37,7 @@ namespace GAM400
         void BuildResource();
 
         std::wstring GetRootPath() const;
+        std::string GetRootPathM() const;
 
         //shader
         ShaderResource* GetShaderResource(const std::wstring& path);
@@ -77,6 +78,8 @@ namespace GAM400
         UndefinedResource* GetUndefinedResource(const std::wstring& path);
         UndefinedResource* GetUndefinedResourceFileName(const std::wstring& file_name);
         void               GetUndefinedResources(const std::wstring& file_name, std::vector<UndefinedResource*>& resources);
+
+        void CreateResourceFileFromPath(const std::string& path);
 
     private:
         void      QueryFilePathRecursive(const std::wstring& path, std::list<std::wstring>& file_list, std::list<std::wstring>& directory_list) const;

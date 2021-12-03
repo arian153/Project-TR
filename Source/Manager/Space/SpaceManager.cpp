@@ -135,4 +135,14 @@ namespace GAM400
             space->Initialize(resource, m_render_system, m_object_factory, m_component_registry, m_logic_system);
         }
     }
+
+    void SpaceManager::SetApplication(Application* app)
+    {
+        m_application = app;
+    }
+
+    Application* SpaceManager::GetApplication() const
+    {
+        return m_application;
+    }
 }

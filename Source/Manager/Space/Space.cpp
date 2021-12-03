@@ -263,6 +263,11 @@ namespace GAM400
         return m_logic_subsystem;
     }
 
+    Application* Space::GetApplication() const
+    {
+        return m_space_manager->GetApplication();
+    }
+
     bool Space::IsSubsystemUpdate(eSubsystemFlag flag) const
     {
         return HasFlag(m_update_flag, flag);

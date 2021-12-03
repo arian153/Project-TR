@@ -9,6 +9,8 @@
 #include "../../Core/Input/MouseInput.hpp"
 #include "../../Core/Utility/CoreUtility.hpp"
 #include "../../Core/Utility/TimeUtility.hpp"
+#include "../../GUI/Editor/Command/CommandRegistry.hpp"
+#include "../../GUI/Editor/Command/EditorCommand.hpp"
 #include "../../Math/Structure/Transform.hpp"
 #include "../../Math/Utility/NoiseUtility.hpp"
 #include "../../Math/Utility/Utility.inl"
@@ -102,6 +104,8 @@ namespace GAM400
                 auto mouse    = m_input->GetMouseInput();
                 m_hit_mouse_y = mouse->CurrentPosition().y;
             }
+
+            m_component->m_edit_grid = m_grid;
         }
     }
 
@@ -135,6 +139,7 @@ namespace GAM400
                         m_terrain_space.UpdateAABBNode(m_edit_hit_data.node);
                         CalculateNTB(m_edit_hit_data.closest_idx);
                         BuildBuffer(false);
+                        m_b_edit_down = true;
                     }
                 }
             }
@@ -187,6 +192,27 @@ namespace GAM400
         if (m_b_edit_down == true)
         {
             m_terrain_space.Update();
+            std::string message;
+
+            if (m_brush_mode == 0)
+            {
+                message = "Edit Terrain Vertex";
+            }
+            else if (m_brush_mode == 1)
+            {
+                message = "Edit Terrain Using Piling Brush";
+            }
+            else if (m_brush_mode == 2)
+            {
+                message = "Edit Terrain Using Digging Brush";
+            }
+
+            m_command_registry->PushCommand(
+                                            new EditFunction<
+                                                MeshData,
+                                                Terrain,
+                                                &Terrain::SetGridData>(this, m_component->m_edit_grid, m_grid, message));
+
             m_b_edit_down = false;
         }
 
@@ -318,7 +344,7 @@ namespace GAM400
         }
     }
 
-    void Terrain::ExportPPM()
+    std::string Terrain::ExportPPM(const std::string& root_path)
     {
         PixelData data;
         data.w = (U32)m_width_div;
@@ -343,14 +369,16 @@ namespace GAM400
         m_height_map_texture_created = m_height_map_texture->Initialize(m_renderer, &data);
 
         std::string time_format = TimeUtility::GetCurrentTimeString();
-        std::string file_path = "TerrainHeightMap" + time_format + ".ppm";
+        std::string file_path   = root_path + "/Terrain/TerrainHeightMap" + time_format + ".ppm";
         TextResource::SavePPM(&data, file_path);
+
+        return file_path;
     }
 
-    void Terrain::ExportOBJ()
+    std::string Terrain::ExportOBJ(const std::string& root_path)
     {
-        std::string time_format = TimeUtility::GetCurrentTimeString();
-        std::string file_path = "TerrainMesh" + time_format + ".obj";
+        std::string   time_format = TimeUtility::GetCurrentTimeString();
+        std::string   file_path   = root_path + "/Terrain/TerrainMesh" + time_format + ".obj";
         std::ofstream ofs;
         ofs.open(file_path, std::ios_base::out);
 
@@ -390,6 +418,7 @@ namespace GAM400
         }
 
         ofs.close();
+        return file_path;
     }
 
     void Terrain::GenerateTrigonometric()
@@ -716,6 +745,11 @@ namespace GAM400
             m_grid.vertices[updated_idx].SetNormal(accumulated_normal.Normalize());
             m_grid.vertices[updated_idx].CalculateTangentAndBinormal();
         }
+    }
+
+    void Terrain::SetCommandRegistry(CommandRegistry* command_registry)
+    {
+        m_command_registry = command_registry;
     }
 
     void Terrain::SetMaterialAmbient(const Color& color)

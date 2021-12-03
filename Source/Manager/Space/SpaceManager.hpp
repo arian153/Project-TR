@@ -13,6 +13,7 @@ namespace GAM400
     class ComponentRegistry;
     class PhysicsSystem;
     class RenderSystem;
+    class Application;
 
     class SpaceManager
     {
@@ -36,6 +37,10 @@ namespace GAM400
         void   RemoveSpace(Space* space);
         void   LoadSpace(Space* space, JsonResource* resource) const;
 
+        void SetApplication(Application* app);
+
+        Application* GetApplication() const;
+
     private:
         friend class Space;
         friend class SpaceEditor;
@@ -56,5 +61,8 @@ namespace GAM400
         //factory
         ObjectFactory*     m_object_factory     = nullptr;
         ComponentRegistry* m_component_registry = nullptr;
+
+
+        Application* m_application = nullptr;
     };
 }

@@ -424,34 +424,6 @@ namespace GAM400
                     space->GetScene()->UpdatePicking(m_picking_ray);
                 }
             }
-
-            //if (space->GetWorld() != nullptr)
-            //{
-            //    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && is_space_hovered)
-            //    {
-            //        space->GetWorld()->SetPickingRay(m_picking_ray);
-            //        auto found_collider = space->GetWorld()->PickColliderSet(m_picking_ray);
-            //        if (found_collider != nullptr)
-            //        {
-            //            m_editing_object = found_collider->GetComponent()->GetOwner();
-            //        }
-            //        /*else
-            //        {
-            //            m_editing_object = nullptr;
-            //        }*/
-            //    }
-
-            //    if (m_editing_object != nullptr)
-            //    {
-            //        if (m_editing_object->HasComponent<ColliderComponent>() && scene != nullptr)
-            //        {
-            //            m_editing_object->GetComponent<ColliderComponent>()->RenderBoundingVolume(scene->GetPrimitiveRenderer(), Color(1.0f, 0.0f, 0.0f, 1.0f));
-            //        }
-            //    }
-            //}
-
-            //ImGui::Text("Ray Pos : (%.3f, %.3f, %.3f)", m_picking_ray.position.x, m_picking_ray.position.y, m_picking_ray.position.z);
-            //ImGui::Text("Ray Dir : (%.3f, %.3f, %.3f)", m_picking_ray.direction.x, m_picking_ray.direction.y, m_picking_ray.direction.z);
         }
         return space;
     }

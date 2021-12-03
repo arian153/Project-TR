@@ -17,6 +17,7 @@ namespace GAM400
     class Scene;
     class World;
     class SpaceManager;
+    class Application;
 
     class Space
     {
@@ -56,6 +57,8 @@ namespace GAM400
         Scene*            GetScene() const;
         World*            GetWorld() const;
         LogicSubsystem*   GetLogicSubsystem() const;
+
+        Application* GetApplication() const;
 
         bool IsSubsystemUpdate(eSubsystemFlag flag) const;
         bool IsSubsystemFixedUpdate(eSubsystemFlag flag) const;

@@ -2,12 +2,14 @@
 
 #include "TransformComponent.hpp"
 #include "../../../External/JSONCPP/json/json.h"
+#include "../../../System/Core/OS-API/Application.hpp"
 #include "../../../System/Core/Utility/CoreUtility.hpp"
 #include "../../../System/Core/Utility/TimeUtility.hpp"
 #include "../../../System/Graphics/Common/Texture/TextureCommon.hpp"
 #include "../../../System/Graphics/Element/Scene.hpp"
 #include "../../../System/Graphics/Element/Terrain.hpp"
 #include "../../../System/Graphics/Utility/PrimitiveRenderer.hpp"
+#include "../../../System/GUI/Editor/GameEditor.hpp"
 #include "../../../System/GUI/Editor/Command/CommandRegistry.hpp"
 #include "../../../System/GUI/Editor/Command/EditorCommand.hpp"
 #include "../../../System/Logic/LogicSubsystem.hpp"
@@ -44,6 +46,8 @@ namespace GAM400
             {
                 m_terrain->m_transform = m_owner->GetComponent<TransformComponent>()->GetTransform();
             }
+
+            m_terrain->SetCommandRegistry(m_space->GetApplication()->GetGameEditor()->GetCommandRegistry());
         }
 
         m_drawing_sphere.radius = 0.1f;
@@ -385,12 +389,18 @@ namespace GAM400
 
             if (ImGui::Button("Export Wavefront OBJ"))
             {
-                m_terrain->ExportOBJ();
+                m_terrain->ExportOBJ(m_space->GetResourceManager()->GetRootPathM());
             }
 
             if (ImGui::Button("Export Height Map"))
             {
-                m_terrain->ExportPPM();
+                std::string path = m_terrain->ExportPPM(m_space->GetResourceManager()->GetRootPathM());
+                m_space->GetResourceManager()->CreateResourceFileFromPath(path);
+                auto height_map_resource = m_space->GetResourceManager()->GetTextResource(ToWString(path));
+
+                m_height_maps.push_back(height_map_resource);
+                std::string name = height_map_resource->FileName() + height_map_resource->FileType();
+                m_height_map_names.push_back(name);
             }
 
             if (m_terrain->m_height_map_texture_created)

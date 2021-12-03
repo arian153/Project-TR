@@ -26,6 +26,8 @@ namespace GAM400
         bool IsOpen() const;
         void SetOpen(bool is_open);
 
+        CommandRegistry* GetCommandRegistry();
+
     private:
         void UpdateFileTab();
         void UpdateEditTab();
