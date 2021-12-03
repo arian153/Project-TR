@@ -42,6 +42,17 @@ namespace GAM400
         I32      value = 0;
     };
 
+    struct EditGridBool
+    {
+        explicit EditGridBool(const MeshData& data)
+            : grid(data)
+        {
+        }
+
+        MeshData grid;
+        bool     boolean = false;
+    };
+
     class Terrain
     {
     public:
@@ -125,13 +136,14 @@ namespace GAM400
         int         m_brush_mode = 0;
         TerrainAABB m_brush;
         Vector3     m_brush_size;
+        Real        m_brush_intensity = 0.01f;
 
         Real m_trigonometric_factor_a = 0.3f;
         Real m_trigonometric_factor_b = 0.05f;
         Real m_perlin_noise_scale     = 100.0f;
         Real m_perlin_noise_density   = 100.0f;
         bool m_b_noise_user_random    = true;
-        bool m_b_analytical_normal         = false;
+        bool m_b_analytical_normal    = false;
         bool m_b_edit_down            = false;
 
         Real m_height_map_scale = 100.0f;

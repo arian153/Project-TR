@@ -8,6 +8,7 @@
 #include "../../Core/Input/KeyboardInput.hpp"
 #include "../../Core/Input/MouseInput.hpp"
 #include "../../Core/Utility/CoreUtility.hpp"
+#include "../../Core/Utility/TimeUtility.hpp"
 #include "../../Math/Structure/Transform.hpp"
 #include "../../Math/Utility/NoiseUtility.hpp"
 #include "../../Math/Utility/Utility.inl"
@@ -158,7 +159,7 @@ namespace GAM400
                 std::vector<SubTerrain*>  sub_terrains;
                 std::vector<TerrainFace*> faces;
 
-                Real addition = m_brush_mode == 1 ? 0.01f : -0.01f;
+                Real addition = m_brush_mode == 1 ? m_brush_intensity : -m_brush_intensity;
 
                 m_terrain_space.ApplyAddition(m_brush, sub_terrains, faces, addition);
 
@@ -341,13 +342,17 @@ namespace GAM400
         m_height_map_texture->Shutdown();
         m_height_map_texture_created = m_height_map_texture->Initialize(m_renderer, &data);
 
-        TextResource::SavePPM(&data, "TerrainHeightMap.ppm");
+        std::string time_format = TimeUtility::GetCurrentTimeString();
+        std::string file_path = "TerrainHeightMap" + time_format + ".ppm";
+        TextResource::SavePPM(&data, file_path);
     }
 
     void Terrain::ExportOBJ()
     {
+        std::string time_format = TimeUtility::GetCurrentTimeString();
+        std::string file_path = "TerrainMesh" + time_format + ".obj";
         std::ofstream ofs;
-        ofs.open("TerrainMesh.obj", std::ios_base::out);
+        ofs.open(file_path, std::ios_base::out);
 
         size_t vertex_count = m_grid.vertices.size();
 

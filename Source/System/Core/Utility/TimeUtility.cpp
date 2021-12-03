@@ -1,5 +1,9 @@
 #include "TimeUtility.hpp"
+
+#include <algorithm>
 #include <chrono>
+#include <iomanip>
+#include <sstream>
 
 namespace GAM400
 {
@@ -85,5 +89,16 @@ namespace GAM400
         m_end_point   = std::chrono::high_resolution_clock::now();
         auto duration = m_end_point - m_begin_point;
         return std::chrono::duration<Real>(duration).count();
+    }
+
+    std::string TimeUtility::GetCurrentTimeString()
+    {
+        // ISO 8601 without timezone information.
+        auto              time = std::time(nullptr);
+        std::stringstream ss;
+        ss << std::put_time(std::localtime(&time), "%F_%T");
+        auto s = ss.str();
+        std::replace(s.begin(), s.end(), ':', '-');
+        return s;
     }
 }

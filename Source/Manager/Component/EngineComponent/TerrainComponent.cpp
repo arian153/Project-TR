@@ -3,6 +3,7 @@
 #include "TransformComponent.hpp"
 #include "../../../External/JSONCPP/json/json.h"
 #include "../../../System/Core/Utility/CoreUtility.hpp"
+#include "../../../System/Core/Utility/TimeUtility.hpp"
 #include "../../../System/Graphics/Common/Texture/TextureCommon.hpp"
 #include "../../../System/Graphics/Element/Scene.hpp"
 #include "../../../System/Graphics/Element/Terrain.hpp"
@@ -422,6 +423,9 @@ namespace GAM400
                 }
 
                 ImGui::Text("Brush Intensity");
+                if (ImGui::SliderFloat("##BrushIntensity", &m_terrain->m_brush_intensity, 0.005f, 0.05f))
+                {
+                }
             }
 
             ImGui::Text("Terrain Generation Method");
@@ -433,6 +437,9 @@ namespace GAM400
                 if (prev_idx != m_terrain_mode)
                 {
                     m_edit_grid = m_terrain->m_grid;
+                    EditGridI32 prev_edit(m_edit_grid);
+                    prev_edit.value = prev_idx;
+
                     if (m_terrain_mode == 0)
                     {
                         if (m_height_map_idx != -1)
@@ -481,11 +488,15 @@ namespace GAM400
                     }
 
                     std::string message = "Change  Terrain Generation Method : " + std::string(terrain_gen[prev_idx]) + " To " + std::string(terrain_gen[m_terrain_mode]);
+
+                    EditGridI32 next_edit(m_terrain->m_grid);
+                    next_edit.value = m_terrain_mode;
+
                     command_registry->PushCommand(
                                                   new EditFunction<
-                                                      MeshData,
-                                                      Terrain,
-                                                      &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                                                      EditGridI32,
+                                                      TerrainComponent,
+                                                      &TerrainComponent::SetTerrainMode>(this, prev_edit, next_edit, message));
                 }
             }
 
@@ -763,48 +774,67 @@ namespace GAM400
                 {
                     if (prev_idx != m_terrain->m_smooth_level)
                     {
-                        m_edit_grid = m_terrain->m_grid;
+                        EditGridI32 prev_edit(m_terrain->m_grid);
+                        prev_edit.value = prev_idx;
 
                         m_terrain->GeneratePerlinNoise();
                         if (!m_terrain->m_b_analytical_normal)
                             m_terrain->CalculateNTB();
 
                         std::string message = "Change Interpolation Mode : " + std::string(interpolation_mode[prev_idx]) + " To " + std::string(interpolation_mode[m_terrain->m_smooth_level]);
+
+                        EditGridI32 next_edit(m_terrain->m_grid);
+                        next_edit.value = m_terrain->m_smooth_level;
+
                         command_registry->PushCommand(
                                                       new EditFunction<
-                                                          MeshData,
-                                                          Terrain,
-                                                          &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                                                          EditGridI32,
+                                                          TerrainComponent,
+                                                          &TerrainComponent::SetTerrainSmoothLevel>(this, prev_edit, next_edit, message));
                     }
                 }
 
+                bool prev_boolean = m_terrain->m_b_noise_user_random;
                 if (ImGui::Checkbox("Use Random Seed##RandOrPerm", &m_terrain->m_b_noise_user_random))
                 {
-                    m_edit_grid = m_terrain->m_grid;
+                    EditGridBool prev_edit(m_terrain->m_grid);
+                    prev_edit.boolean = prev_boolean;
+
                     m_terrain->GeneratePerlinNoise();
                     if (!m_terrain->m_b_analytical_normal)
                         m_terrain->CalculateNTB();
 
                     std::string message = m_terrain->m_b_noise_user_random ? "Use Permutation to Random Seed" : "Use Random Seed to Permutation";
+
+                    EditGridBool next_edit(m_terrain->m_grid);
+                    next_edit.boolean = m_terrain->m_b_noise_user_random;
+
                     command_registry->PushCommand(
                                                   new EditFunction<
-                                                      MeshData,
-                                                      Terrain,
-                                                      &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                                                      EditGridBool,
+                                                      TerrainComponent,
+                                                      &TerrainComponent::SetSeedCheckBox>(this, prev_edit, next_edit, message));
                 }
 
+                prev_boolean = m_terrain->m_b_analytical_normal;
                 if (ImGui::Checkbox("Use Analytical NBT##OrFaceNormal", &m_terrain->m_b_analytical_normal))
                 {
-                    m_edit_grid = m_terrain->m_grid;
+                    EditGridBool prev_edit(m_terrain->m_grid);
+                    prev_edit.boolean = prev_boolean;
+
                     m_terrain->GeneratePerlinNoise();
                     if (!m_terrain->m_b_analytical_normal)
                         m_terrain->CalculateNTB();
                     std::string message = m_terrain->m_b_analytical_normal ? "Use Face NBT to Analytical NBT" : "Use Analytical NBT to Face NBT";
+
+                    EditGridBool next_edit(m_terrain->m_grid);
+                    next_edit.boolean = m_terrain->m_b_analytical_normal;
+
                     command_registry->PushCommand(
                                                   new EditFunction<
-                                                      MeshData,
-                                                      Terrain,
-                                                      &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                                                      EditGridBool,
+                                                      TerrainComponent,
+                                                      &TerrainComponent::SetNormalCheckBox>(this, prev_edit, next_edit, message));
                 }
 
                 if (m_terrain->m_b_noise_user_random)
@@ -850,8 +880,9 @@ namespace GAM400
                 {
                     if (prev_idx != m_height_map_idx)
                     {
-                        m_edit_grid   = m_terrain->m_grid;
-                        auto resource = m_height_maps[m_height_map_idx];
+                        EditGridI32 prev_edit(m_terrain->m_grid);
+                        prev_edit.value = prev_idx;
+                        auto resource   = m_height_maps[m_height_map_idx];
 
                         auto pixel_data = resource->GetPixelData();
                         if (pixel_data != nullptr)
@@ -884,11 +915,15 @@ namespace GAM400
                         std::string message = prev_idx == -1
                                                   ? "Select Height Map : " + std::string(m_height_map_names[m_height_map_idx])
                                                   : "Change Height Map : " + std::string(m_height_map_names[prev_idx]) + " To " + std::string(m_height_map_names[m_height_map_idx]);
+
+                        EditGridI32 next_edit(m_terrain->m_grid);
+                        next_edit.value = m_height_map_idx;
+
                         command_registry->PushCommand(
                                                       new EditFunction<
-                                                          MeshData,
-                                                          Terrain,
-                                                          &Terrain::SetGridData>(m_terrain, m_edit_grid, m_terrain->m_grid, message));
+                                                          EditGridI32,
+                                                          TerrainComponent,
+                                                          &TerrainComponent::SetHeightMapIndex>(this, prev_edit, next_edit, message));
                     }
                 }
 
@@ -984,6 +1019,49 @@ namespace GAM400
     {
         m_noise_seed      = (U32)data.value;
         m_terrain->m_grid = data.grid;
+        m_terrain->m_terrain_space.Update();
+        m_terrain->BuildBuffer();
+    }
+
+    void TerrainComponent::SetTerrainMode(const EditGridI32& data)
+    {
+        m_terrain_mode    = data.value;
+        m_terrain->m_grid = data.grid;
+        m_terrain->m_terrain_space.Update();
+        m_terrain->BuildBuffer();
+    }
+
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void TerrainComponent::SetTerrainSmoothLevel(const EditGridI32& data)
+    {
+        m_terrain->m_smooth_level = data.value;
+        m_terrain->m_grid         = data.grid;
+        m_terrain->m_terrain_space.Update();
+        m_terrain->BuildBuffer();
+    }
+
+    void TerrainComponent::SetHeightMapIndex(const EditGridI32& data)
+    {
+        m_height_map_idx  = data.value;
+        m_terrain->m_grid = data.grid;
+        m_terrain->m_terrain_space.Update();
+        m_terrain->BuildBuffer();
+    }
+
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void TerrainComponent::SetSeedCheckBox(const EditGridBool& data)
+    {
+        m_terrain->m_b_noise_user_random = data.boolean;
+        m_terrain->m_grid                = data.grid;
+        m_terrain->m_terrain_space.Update();
+        m_terrain->BuildBuffer();
+    }
+
+    // ReSharper disable once CppMemberFunctionMayBeConst
+    void TerrainComponent::SetNormalCheckBox(const EditGridBool& data)
+    {
+        m_terrain->m_b_analytical_normal = data.boolean;
+        m_terrain->m_grid                = data.grid;
         m_terrain->m_terrain_space.Update();
         m_terrain->BuildBuffer();
     }

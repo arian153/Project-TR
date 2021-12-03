@@ -21,7 +21,8 @@ namespace GAM400
 
         void RecordBegin();
         Real RecordEnd();
-        
+
+        static std::string GetCurrentTimeString();
 
     private:
         //time data

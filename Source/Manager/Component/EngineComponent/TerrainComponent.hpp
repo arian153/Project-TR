@@ -11,6 +11,7 @@
 
 namespace GAM400
 {
+    struct EditGridBool;
     struct EditGridI32;
     struct EditGridReal;
     class TextResource;
@@ -43,6 +44,11 @@ namespace GAM400
         void     Clone(TerrainComponent* origin);
 
         void SetTerrainSeed(const EditGridI32& data);
+        void SetTerrainMode(const EditGridI32& data);
+        void SetTerrainSmoothLevel(const EditGridI32& data);
+        void SetHeightMapIndex(const EditGridI32& data);
+        void SetSeedCheckBox(const EditGridBool& data);
+        void SetNormalCheckBox(const EditGridBool& data);
 
     private:
         Terrain*           m_terrain = nullptr;
@@ -58,6 +64,8 @@ namespace GAM400
 
         U32  m_edit_seed = 142356;
         Real m_edit_hm_scale;
+
+        int m_edit_terrain_mode = 0;
 
         std::vector<TextResource*> m_height_maps;
         std::vector<std::string>   m_height_map_names;
