@@ -13,6 +13,7 @@ Platform: Visual Studio 2019 (v142), Windows SDK 10.0 x64>
 #include "TransformComponent.hpp"
 #include "../../../External/JSONCPP/json/json.h"
 #include "../../../System/Core/OS-API/Application.hpp"
+#include "../../../System/Core/OS-API/Win32/Win32Utility.hpp"
 #include "../../../System/Core/Utility/CoreUtility.hpp"
 #include "../../../System/Core/Utility/TimeUtility.hpp"
 #include "../../../System/Graphics/Common/Texture/TextureCommon.hpp"
@@ -399,18 +400,28 @@ namespace GAM400
 
             if (ImGui::Button("Export Wavefront OBJ"))
             {
-                m_terrain->ExportOBJ(m_space->GetResourceManager()->GetRootPathM());
+                std::string path = Win32Util::GetMyDocumentPath() + "\\TRGP Output";
+                if (Win32Util::CreateDirectoryPath(path))
+                {
+                    m_terrain->ExportOBJ(path);
+                }
             }
 
             if (ImGui::Button("Export Height Map"))
             {
-                std::string path = m_terrain->ExportPPM(m_space->GetResourceManager()->GetRootPathM());
-                m_space->GetResourceManager()->CreateResourceFileFromPath(path);
-                auto height_map_resource = m_space->GetResourceManager()->GetTextResource(ToWString(path));
+                std::string path = Win32Util::GetMyDocumentPath() + "\\TRGP Output";
+                if (Win32Util::CreateDirectoryPath(path))
+                {
+                    m_terrain->ExportPPM(path);
+                }
 
-                m_height_maps.push_back(height_map_resource);
-                std::string name = height_map_resource->FileName() + height_map_resource->FileType();
-                m_height_map_names.push_back(name);
+                /*std::string path = m_terrain->ExportPPM(path);
+                 m_space->GetResourceManager()->CreateResourceFileFromPath(path);
+                 auto height_map_resource = m_space->GetResourceManager()->GetTextResource(ToWString(path));
+ 
+                 m_height_maps.push_back(height_map_resource);
+                 std::string name = height_map_resource->FileName() + height_map_resource->FileType();
+                 m_height_map_names.push_back(name);*/
             }
 
             if (m_terrain->m_height_map_texture_created)

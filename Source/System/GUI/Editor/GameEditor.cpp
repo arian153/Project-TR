@@ -371,6 +371,9 @@ namespace GAM400
                 ImGui::Text("3. Terrain Editing");
                 ImGui::Text("   Press Mouse RB        - Select Vertex on Terrain");
                 ImGui::Text("    Hold Mouse RB & move - Edit Vertex or Apply Terrain Brush");
+                ImGui::Text("4. Export Terrain");
+                ImGui::Text("   Press Export PPM or OBJ Button on Inspector Window");
+                ImGui::Text(R"(   You can find exported file in "Documents\TRGP Output\")");
 
                 ImGui::EndChild();
                 if (ImGui::Button("Close"))

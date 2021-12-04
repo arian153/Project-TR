@@ -379,7 +379,9 @@ namespace GAM400
         m_height_map_texture_created = m_height_map_texture->Initialize(m_renderer, &data);
 
         std::string time_format = TimeUtility::GetCurrentTimeString();
-        std::string file_path   = root_path + "/Terrain/TerrainHeightMap" + time_format + ".ppm";
+        std::string file_name   = "\\TerrainHeightMap" + time_format + ".ppm";
+        std::string file_path   = root_path + file_name;
+
         TextResource::SavePPM(&data, file_path);
 
         return file_path;
@@ -388,7 +390,8 @@ namespace GAM400
     std::string Terrain::ExportOBJ(const std::string& root_path)
     {
         std::string   time_format = TimeUtility::GetCurrentTimeString();
-        std::string   file_path   = root_path + "/Terrain/TerrainMesh" + time_format + ".obj";
+        std::string   file_name   = "\\TerrainMesh" + time_format + ".obj";
+        std::string   file_path   = root_path + file_name;
         std::ofstream ofs;
         ofs.open(file_path, std::ios_base::out);
 

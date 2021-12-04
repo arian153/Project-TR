@@ -17,9 +17,9 @@ namespace GAM400
 {
     enum class ePermission
     {
-        Read
-      , Write
-      , All
+        Read,
+        Write,
+        All
     };
 
     class FileUtility
@@ -53,6 +53,5 @@ namespace GAM400
         bool ReadFileToFileBuffer(const std::wstring& path, std::vector<U8>& buffer);
         bool ReadFileToStringBuffer(const std::wstring& path, std::string& buffer);
     private:
-       
     };
 }
