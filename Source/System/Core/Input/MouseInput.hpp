@@ -1,3 +1,13 @@
+/*---------------------------------------------------------------------
+//All content (C) 2021 DigiPen (USA) Corporation, all rights reserved
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+Author: Eric Han
+E-Mail: jangseok.han@digipen.edu
+Language: C++, std::c++17
+Platform: Visual Studio 2019 (v142), Windows SDK 10.0 x64>
+-----------------------------------------------------------------------*/
+
 #pragma once
 #include "../OS-API/OSAPI.hpp"
 #include IncludeMouseAPI
@@ -50,7 +60,7 @@ namespace GAM400
     private:
         MousePosition m_current_position;
         MousePosition m_previous_position;
-        ButtonState   m_button_state[ MAXIMUM_BUTTON_COUNT ];
+        ButtonState   m_button_state[MAXIMUM_BUTTON_COUNT];
         short         m_current_wheel    = 0;
         short         m_previous_wheel   = 0;
         bool          m_b_was_wheel      = false;

@@ -1,15 +1,21 @@
+/*---------------------------------------------------------------------
+//All content (C) 2021 DigiPen (USA) Corporation, all rights reserved
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+Author: Eric Han
+E-Mail: jangseok.han@digipen.edu
+Language: C++, std::c++17
+Platform: Visual Studio 2019 (v142), Windows SDK 10.0 x64>
+-----------------------------------------------------------------------*/
+
 #pragma once
 
 #include "Component/Component.hpp"
 #include "Component/ComponentManager.hpp"
 #include "Component/EngineComponent/CameraComponent.hpp"
-#include "Component/EngineComponent/ColliderComponent.hpp"
 #include "Component/EngineComponent/LightComponent.hpp"
 #include "Component/EngineComponent/MeshComponent.hpp"
 #include "Component/EngineComponent/ParticleEmitterComponent.hpp"
-#include "Component/EngineComponent/PointConstraintComponent.hpp"
-#include "Component/EngineComponent/RigidBodyComponent.hpp"
-#include "Component/EngineComponent/TextSpriteComponent.hpp"
 #include "Component/EngineComponent/TransformComponent.hpp"
 #include "Component/GameComponent/LogicComponent.hpp"
 #include "Component/ComponentFactory.hpp"

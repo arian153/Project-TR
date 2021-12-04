@@ -1,3 +1,13 @@
+/*---------------------------------------------------------------------
+//All content (C) 2021 DigiPen (USA) Corporation, all rights reserved
+Reproduction or disclosure of this file or its contents without the
+prior written consent of DigiPen Institute of Technology is prohibited.
+Author: Eric Han
+E-Mail: jangseok.han@digipen.edu
+Language: C++, std::c++17
+Platform: Visual Studio 2019 (v142), Windows SDK 10.0 x64>
+-----------------------------------------------------------------------*/
+
 #pragma once
 
 #include "RenderSystem.hpp"
@@ -13,8 +23,6 @@
 #include "Element/Camera.hpp"
 #include "Element/ParticleEmitter.hpp"
 #include "Element/Scene.hpp"
-
-#include "Common/Element/Mesh.hpp"
 
 #include "Common/Renderer/RendererCommon.hpp"
 #include "Common/Texture/TextureArrayCommon.hpp"
