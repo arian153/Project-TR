@@ -2,6 +2,7 @@
 #include "../../External/imgui/imgui.h"
 #include "../../External/imgui/win32/imgui_impl_win32.h"
 #include "../../External/imgui/dx11/imgui_impl_dx11.h"
+#include "../../Manager/Resource/ResourceManager.hpp"
 #include "../Core/OS-API/Application.hpp"
 #include "../Core/OS-API/OSCommon.hpp"
 #include "../Graphics/RenderSystem.hpp"
@@ -22,6 +23,10 @@ namespace GAM400
     void GUISystem::Initialize(Application* application)
     {
         (void)m_im_gui_io;
+
+        m_im_gui_io.WantSaveIniSettings = false;
+        //m_im_gui_io.IniFilename = (application->GetResourceManager()->GetRootPathM() + "/Data/imgui.ini").c_str();
+
         //m_im_gui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
         //m_im_gui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
         m_im_gui_io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;

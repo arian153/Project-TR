@@ -49,6 +49,7 @@ namespace GAM400
         m_render_system = new RenderSystem(m_operating_system);
         m_render_system->Initialize(m_initial_setting.screen_width, m_initial_setting.screen_height, m_initial_setting.b_v_sync, m_resource_manager);
         //GUI
+     
         GUISystem::CreateGUIContext();
         m_gui_system = new GUISystem(ImGui::GetIO());
         m_gui_system->Initialize(this);
@@ -80,6 +81,11 @@ namespace GAM400
         m_gui_system->AddGUI(m_game_editor);
         m_level_manager->SetInitialLevel(m_initial_setting.initial_level);
         m_game_editor->SetOpen(m_initial_setting.initial_level == "");
+
+        if (m_initial_setting.edit_space != "")
+        {
+            m_game_editor->SetInitialEditSpace(m_initial_setting.edit_space);
+        }
     }
 
     void Application::Update() const

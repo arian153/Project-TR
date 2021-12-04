@@ -245,6 +245,21 @@ namespace GAM400
         ImGui::End();
     }
 
+    void SpaceEditor::OpenSpace(const std::string& name)
+    {
+        size_t size = m_resources.size();
+
+        for (size_t i = 0; i < size; ++i)
+        {
+            JsonResource* resource = m_resources.at(i);
+            if (resource->FileName() == name || resource->FileName() + resource->FileType() == name)
+            {
+                if (!resource->IsOpen())
+                    DoOpen(resource);
+            }
+        }
+    }
+
     void SpaceEditor::OpenSequence()
     {
         for (size_t i = 0; i < m_resources.size(); ++i)
@@ -349,8 +364,8 @@ namespace GAM400
     {
         if (!ImGui::BeginPopupContextItem())
             return;
-        if (ImGui::MenuItem(("Save " + resource->FileName()).c_str(), "CTRL+S", false, resource->IsOpen()))
-            DoSave(resource);
+       /* if (ImGui::MenuItem(("Save " + resource->FileName()).c_str(), "CTRL+S", false, resource->IsOpen()))
+            DoSave(resource);*/
         if (ImGui::MenuItem("Close", "CTRL+W", false, resource->IsOpen()))
             DoQueueClose(resource);
         ImGui::EndPopup();

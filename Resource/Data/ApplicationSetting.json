@@ -1,12 +1,13 @@
 {
-    "Settings": {
-        "Confine Cursor": false,
-        "Screen Resolution": [ 2880, 1800 ],
-        "Show Cursor": true,
-        "V-Sync": false,
-        "Window Caption": "Terrain Generating and Rendering Project",
-        "Window Mode": "Windowed",
-        "Initial Level": ""
-    },
-    "Type": "Setting"
+  "Settings": {
+    "Confine Cursor": false,
+    "Screen Resolution": [2880, 1800],
+    "Show Cursor": true,
+    "V-Sync": false,
+    "Window Caption": "Terrain Generating and Rendering Project",
+    "Window Mode": "Windowed",
+    "Initial Level": "",
+    "Edit Space": "Terrain.json"
+  },
+  "Type": "Setting"
 }

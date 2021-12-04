@@ -35,6 +35,7 @@ namespace GAM400
         void UpdateHierarchyWindow();
         void UpdateSpaceSetting();
 
+        void OpenSpace(const std::string& name);
         void OpenSequence();
         void CloseAllSequence();
         void CloseSequence();

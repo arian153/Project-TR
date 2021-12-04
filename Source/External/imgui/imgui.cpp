@@ -10647,6 +10647,9 @@ void ImGui::LoadIniSettingsFromMemory(const char* ini_data, size_t ini_size)
 void ImGui::SaveIniSettingsToDisk(const char* ini_filename)
 {
     ImGuiContext& g = *GImGui;
+    if (g.IO.WantSaveIniSettings == false)
+        return;
+
     g.SettingsDirtyTimer = 0.0f;
     if (!ini_filename)
         return;
@@ -10664,6 +10667,9 @@ void ImGui::SaveIniSettingsToDisk(const char* ini_filename)
 const char* ImGui::SaveIniSettingsToMemory(size_t* out_size)
 {
     ImGuiContext& g = *GImGui;
+    if (g.IO.WantSaveIniSettings == false)
+        return ""; 
+
     g.SettingsDirtyTimer = 0.0f;
     g.SettingsIniData.Buf.resize(0);
     g.SettingsIniData.Buf.push_back(0);

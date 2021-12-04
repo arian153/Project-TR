@@ -4,11 +4,96 @@
 #include "../../../Manager/Level/LevelManager.hpp"
 #include "../../../Manager/Object/ObjectFactory.hpp"
 #include "../../../Manager/Object/ObjectManager.hpp"
+#include "../../../Manager/Resource/ResourceManager.hpp"
 #include "../../../Manager/Resource/ResourceType/JsonResource.hpp"
+#include "../../../Manager/Resource/ResourceType/TextureResource.hpp"
 #include "../../../Manager/Space/Space.hpp"
 #include "../../Core/Input/InputCommon.hpp"
 #include "../../Core/Input/KeyboardInput.hpp"
+#include "../../Graphics/Common/Texture/TextureCommon.hpp"
 #include "Command/EditorCommand.hpp"
+
+namespace
+{
+    const char json_cpp_license[] = R"(
+========================================================================
+Copyright (c) 2007-2010 Baptiste Lepilleur and The JsonCpp Authors
+
+Permission is hereby granted, free of charge, to any person
+obtaining a copy of this software and associated documentation
+files (the "Software"), to deal in the Software without
+restriction, including without limitation the rights to use, copy,
+modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be
+included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
+NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS
+BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN
+ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN
+CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+========================================================================
+    )";
+
+    const char dx_tex_license[] = R"(
+==========================================================================================
+                               The MIT License (MIT)
+
+Copyright (c) 2011-2020 Microsoft Corp
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this 
+software and associated documentation files (the "Software"), to deal in the Software 
+without restriction, including without limitation the rights to use, copy, modify, 
+merge, publish, distribute, sublicense, and/or sell copies of the Software, and to 
+permit persons to whom the Software is furnished to do so, subject to the following 
+conditions: 
+
+The above copyright notice and this permission notice shall be included in all copies 
+or substantial portions of the Software.  
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A 
+PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT 
+HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF 
+CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE 
+OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+
+==========================================================================================
+    )";
+
+    const char imgui_license[] = R"(
+--------------------------------------------------------------------------------------
+ The MIT License (MIT)
+ 
+ Copyright (c) 2014-2020 Omar Cornut
+ 
+ Permission is hereby granted, free of charge, to any person obtaining a copy
+ of this software and associated documentation files (the "Software"), to deal
+ in the Software without restriction, including without limitation the rights
+ to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ copies of the Software, and to permit persons to whom the Software is
+ furnished to do so, subject to the following conditions:
+ 
+ The above copyright notice and this permission notice shall be included in all
+ copies or substantial portions of the Software.
+ 
+ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ SOFTWARE.
+ 
+--------------------------------------------------------------------------------------
+    )";
+}
 
 namespace GAM400
 {
@@ -36,6 +121,8 @@ namespace GAM400
         m_object_factory   = m_application->GetObjectFactory();
         m_resource_manager = m_application->GetResourceManager();
         m_object_factory->GetArchetypeName(m_archetype_names);
+
+        m_logo_texture = m_resource_manager->GetTextureResource(L"../../Resource/Texture/DigiPen_RED_1024px.png");
     }
 
     void GameEditor::Update(Real dt)
@@ -62,7 +149,8 @@ namespace GAM400
             {
                 UpdateFileTab();
                 UpdateEditTab();
-                UpdateObjectTab();
+                //UpdateObjectTab();
+                UpdateHelpTab();
                 ImGui::EndMenuBar();
             }
             ImGui::End();
@@ -76,6 +164,15 @@ namespace GAM400
             }
             UpdateShortCuts();
             ShowReadMe();
+            ShowLicense();
+            ShowAbout();
+            ShowCredit();
+
+            if (m_will_open_space)
+            {
+                m_will_open_space = false;
+                m_space_editor.OpenSpace(m_initial_space_name);
+            }
         }
     }
 
@@ -94,9 +191,15 @@ namespace GAM400
         m_b_open = is_open;
     }
 
-    CommandRegistry* GameEditor::GetCommandRegistry() 
+    CommandRegistry* GameEditor::GetCommandRegistry()
     {
         return &m_command_registry;
+    }
+
+    void GameEditor::SetInitialEditSpace(const std::string& space)
+    {
+        m_will_open_space    = true;
+        m_initial_space_name = space;
     }
 
     void GameEditor::UpdateFileTab()
@@ -104,10 +207,10 @@ namespace GAM400
         if (ImGui::BeginMenu("File"))
         {
             size_t open_count = m_space_editor.OpenCount();
-            if (ImGui::BeginMenu("New - Not Implemented Yet"))
-            {
-                ImGui::EndMenu();
-            }
+            //if (ImGui::BeginMenu("New - Not Implemented Yet"))
+            //{
+            //    ImGui::EndMenu();
+            //}
             if (ImGui::BeginMenu("Open"))
             {
                 if (ImGui::BeginMenu("Space", open_count < m_space_editor.Size()))
@@ -126,13 +229,13 @@ namespace GAM400
             {
                 m_space_editor.CloseAllSequence();
             }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Save - Not Implemented Yet", nullptr, false, open_count > 0))
-            {
-            }
-            if (ImGui::MenuItem("Save All - Not Implemented Yet", nullptr, false, open_count > 0))
-            {
-            }
+            //ImGui::Separator();
+            //if (ImGui::MenuItem("Save - Not Implemented Yet", nullptr, false, open_count > 0))
+            //{
+            //}
+            //if (ImGui::MenuItem("Save All - Not Implemented Yet", nullptr, false, open_count > 0))
+            //{
+            //}
             ImGui::Separator();
             if (ImGui::MenuItem("Exit"))
             {
@@ -154,22 +257,22 @@ namespace GAM400
             {
                 m_command_registry.RedoCommand();
             }
-            ImGui::Separator();
-            if (ImGui::MenuItem("Cut - Not Implemented Yet"))
-            {
-            }
-            if (ImGui::MenuItem("Copy - Not Implemented Yet"))
-            {
-            }
-            if (ImGui::MenuItem("Paste - Not Implemented Yet"))
-            {
-            }
-            if (ImGui::MenuItem("Duplicate - Not Implemented Yet"))
-            {
-            }
-            if (ImGui::MenuItem("Delete - Not Implemented Yet"))
-            {
-            }
+            //ImGui::Separator();
+            //if (ImGui::MenuItem("Cut - Not Implemented Yet"))
+            //{
+            //}
+            //if (ImGui::MenuItem("Copy - Not Implemented Yet"))
+            //{
+            //}
+            //if (ImGui::MenuItem("Paste - Not Implemented Yet"))
+            //{
+            //}
+            //if (ImGui::MenuItem("Duplicate - Not Implemented Yet"))
+            //{
+            //}
+            //if (ImGui::MenuItem("Delete - Not Implemented Yet"))
+            //{
+            //}
             ImGui::EndMenu();
         }
     }
@@ -195,6 +298,19 @@ namespace GAM400
                 ImGui::EndMenu();
             }
             ImGui::Separator();
+            ImGui::EndMenu();
+        }
+    }
+
+    void GameEditor::UpdateHelpTab()
+    {
+        if (ImGui::BeginMenu("Help"))
+        {
+            ImGui::MenuItem("Read Me", nullptr, &m_show_readme);
+            ImGui::MenuItem("Credit", nullptr, &m_show_credit);
+            ImGui::MenuItem("License", nullptr, &m_show_license);
+            ImGui::MenuItem("About", nullptr, &m_show_about);
+
             ImGui::EndMenu();
         }
     }
@@ -231,6 +347,9 @@ namespace GAM400
         {
             if (ImGui::Begin("Read Me", &m_show_readme))
             {
+                ImGui::BeginGroup();
+                ImGui::BeginChild("Usage", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+
                 ImGui::Text("Usage");
                 ImGui::Text("1. Click File Tab, and Open Space.");
                 ImGui::Text("2. Camera Control");
@@ -239,11 +358,16 @@ namespace GAM400
                 ImGui::Text("    Press W, S           - Change camera position Front and Back");
                 ImGui::Text("    Press A, D           - Change camera position Left and Right");
                 ImGui::Text("    Press R, F           - Change camera position Up and Down");
-                ImGui::NewLine();
+                ImGui::Text("3. Terrain Editing");
+                ImGui::Text("   Press Mouse RB        - Select Vertex on Terrain");
+                ImGui::Text("    Hold Mouse RB & move - Edit Vertex or Apply Terrain Brush");
+
+                ImGui::EndChild();
                 if (ImGui::Button("Close"))
                 {
                     m_show_readme = false;
                 }
+                ImGui::EndGroup();
                 ImGui::End();
             }
         }
@@ -259,6 +383,139 @@ namespace GAM400
         if (io.KeyCtrl && ImGui::IsKeyPressed(io.KeyMap[ImGuiKey_Y]))
         {
             m_command_registry.RedoCommand();
+        }
+    }
+
+    void GameEditor::ShowLicense()
+    {
+        if (m_show_license)
+        {
+            if (ImGui::Begin("License", &m_show_license))
+            {
+                ImGui::BeginGroup();
+                ImGui::BeginChild("License", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+
+                ImGui::Text("Open Source License");
+                if (ImGui::CollapsingHeader("jsoncpp"))
+                {
+                    ImGui::Text(json_cpp_license);
+                }
+                if (ImGui::CollapsingHeader("DirectXTex texture processing library"))
+                {
+                    ImGui::Text(dx_tex_license);
+                }
+                if (ImGui::CollapsingHeader("Dear ImGui"))
+                {
+                    ImGui::Text(imgui_license);
+                }
+
+                ImGui::EndChild();
+                if (ImGui::Button("Close"))
+                {
+                    m_show_license = false;
+                }
+                ImGui::EndGroup();
+
+                ImGui::End();
+            }
+        }
+    }
+
+    void GameEditor::ShowAbout()
+    {
+        if (m_show_about)
+        {
+            if (ImGui::Begin("About", &m_show_about))
+            {
+                ImGui::BeginGroup();
+                ImGui::BeginChild("About", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+
+                ImGui::NewLine();
+                ImGui::NewLine();
+                ImGui::NewLine();
+
+                ImVec2 min         = ImGui::GetWindowContentRegionMin();
+                ImVec2 max         = ImGui::GetWindowContentRegionMax();
+                Real   scene_scale = max.x - min.x;
+                Real   ratio       = 0.241211f;
+                ImVec2 size        = ImVec2(scene_scale, scene_scale * ratio);
+                ImGui::Image(
+                             m_logo_texture->GetTexture()->GetTexture(), size,
+                             m_uv_min, m_uv_max, m_tint_col, m_border_col);
+
+                ImGui::NewLine();
+                ImGui::NewLine();
+                ImGui::Text("Terrain Generating & Rendering Project");
+                ImGui::Text("Version 1.0.12032021");
+                ImGui::Text(R"(All content © 2021 DigiPen (USA) Corporation, all rights reserved.)");
+
+                ImGui::EndChild();
+                if (ImGui::Button("Close"))
+                {
+                    m_show_about = false;
+                }
+                ImGui::EndGroup();
+                ImGui::End();
+            }
+        }
+    }
+
+    void GameEditor::ShowCredit()
+    {
+        if (m_show_credit)
+        {
+            if (ImGui::Begin("Credit", &m_show_credit))
+            {
+                ImGui::BeginGroup();
+                ImGui::BeginChild("Credit", ImVec2(0, -ImGui::GetFrameHeightWithSpacing()));
+
+                ImGui::Text("Credit");
+                ImGui::NewLine();
+                ImGui::NewLine();
+                ImGui::Text("Tech Lead");
+                ImGui::Text(" Eric Han");
+                ImGui::NewLine();
+                ImGui::Text("Graphics Programming");
+                ImGui::Text(" Eric Han");
+                ImGui::NewLine();
+                ImGui::Text("Tool Programming");
+                ImGui::Text(" Eric Han");
+                ImGui::NewLine();
+
+                ImGui::Text("Faculty & Advisors");
+                ImGui::Text(" Andrew Kaplan");
+                ImGui::Text(" Jen Sward");
+                ImGui::Text(" Kai Tagawa");
+                ImGui::NewLine();
+
+                ImGui::Text("Created at");
+                ImGui::Text(" DigiPen Institute of Technology");
+                ImGui::NewLine();
+
+                ImGui::Text("PRESIDENT");
+                ImGui::Text(" CLAUDE COMAIR");
+                ImGui::NewLine();
+
+                ImGui::Text("EXECUTIVES");
+                ImGui::Text(" JASON CHU");
+                ImGui::Text(" SAMIR ABOU SAMRA   ");
+                ImGui::Text(" MICHELE COMAIR");
+                ImGui::Text(" ANGELA KUGLER   ");
+                ImGui::Text(" ERIK MOHRMANN");
+                ImGui::Text(" BENJAMIN ELLINGER");
+                ImGui::Text(" MELVIN GONSALVEZ");
+                ImGui::NewLine();
+
+                ImGui::Text(R"(All content © 2021 DigiPen (USA) Corporation, all rights reserved.)");
+
+                ImGui::EndChild();
+                if (ImGui::Button("Close"))
+                {
+                    m_show_credit = false;
+                }
+                ImGui::EndGroup();
+                ImGui::End();
+            }
         }
     }
 }

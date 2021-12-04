@@ -18,6 +18,7 @@ namespace GAM400
 
         std::string caption       = "";
         std::string initial_level = "";
+        std::string edit_space    = "";
         eWindowMode window_mode   = eWindowMode::Windowed;
     };
 }

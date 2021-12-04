@@ -351,6 +351,11 @@ namespace GAM400
             {
                 app_setting.initial_level = setting["Initial Level"].asString();
             }
+
+            if (HasMember(setting, "Edit Space") && setting["Edit Space"].isString())
+            {
+                app_setting.edit_space = setting["Edit Space"].asString();
+            }
             return true;
         }
         return false;
@@ -390,7 +395,7 @@ namespace GAM400
                     space->GetScene()->SetProjectionType(eProjectionType::OrthoGraphic);
                 }
             }
-                   }
+        }
         if (HasMember(*m_root_data, "Objects") && (*m_root_data)["Objects"].isArray())
         {
             for (auto it = (*m_root_data)["Objects"].begin(); it != (*m_root_data)["Objects"].end(); ++it)

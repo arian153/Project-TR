@@ -7,6 +7,7 @@
 
 namespace GAM400
 {
+    class TextureResource;
     class KeyboardInput;
     class InputCommon;
     class ObjectFactory;
@@ -28,13 +29,20 @@ namespace GAM400
 
         CommandRegistry* GetCommandRegistry();
 
+        void SetInitialEditSpace(const std::string& space);
     private:
         void UpdateFileTab();
         void UpdateEditTab();
         void UpdateObjectTab();
+        void UpdateHelpTab();
+
         void UpdateCommandWindow();
         void ShowReadMe();
         void UpdateShortCuts();
+
+        void ShowLicense();
+        void ShowAbout();
+        void ShowCredit();
 
     private:
         LevelEditor     m_level_editor;
@@ -54,7 +62,20 @@ namespace GAM400
         std::string m_editor_label  = "";
         int         m_command_index = 0;
 
-        bool m_show_readme = true;
+        bool        m_will_open_space    = false;
+        std::string m_initial_space_name = "";
+
+        bool m_show_readme  = false;
+        bool m_show_about   = false;
+        bool m_show_license = false;
+        bool m_show_credit  = false;
+
+        TextureResource* m_logo_texture = nullptr;
+        ImVec2           m_uv_min       = ImVec2(0.0f, 0.0f);                   // Top-left
+        ImVec2           m_uv_max       = ImVec2(1.0f, 1.0f);                   // Lower-right
+        ImVec4           m_tint_col     = ImVec4(1.0f, 1.0f, 1.0f, 1.0f); // No tint
+        ImVec4           m_border_col   = ImVec4(1.0f, 1.0f, 1.0f, 0.0f); 
+
         //imgui flag
         ImGuiDockNodeFlags m_dock_space_flags = ImGuiDockNodeFlags_None;
         ImGuiWindowFlags   m_window_flags     = ImGuiWindowFlags_MenuBar | ImGuiWindowFlags_NoDocking;
