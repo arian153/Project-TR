@@ -34,7 +34,7 @@ namespace GAM400
     {
         (void)m_im_gui_io;
 
-        m_im_gui_io.WantSaveIniSettings = false;
+        //m_im_gui_io.WantSaveIniSettings = false;
         //m_im_gui_io.IniFilename = (application->GetResourceManager()->GetRootPathM() + "/Data/imgui.ini").c_str();
 
         //m_im_gui_io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
